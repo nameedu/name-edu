@@ -1,7 +1,14 @@
-
-import { GraduationCap, BookOpen, Award, MessageSquare } from "lucide-react";
+import { GraduationCap, BookOpen, Award, MessageSquare, Building, Users, FileText, Video, Book, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 const Index = () => {
   return (
@@ -17,11 +24,73 @@ const Index = () => {
                 className="h-8"
               />
             </a>
-            <div className="hidden md:flex space-x-4">
-              <a href="#courses" className="nav-link">Courses</a>
-              <a href="#results" className="nav-link">Results</a>
-              <a href="#resources" className="nav-link">Resources</a>
-              <a href="#contact" className="nav-link">Contact</a>
+            <div className="hidden md:flex items-center space-x-4">
+              <NavigationMenu>
+                <NavigationMenuList>
+                  {/* About Us Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>About Us</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                        {aboutUsLinks.map((item) => (
+                          <li key={item.title}>
+                            <NavigationMenuLink asChild>
+                              <a
+                                href={item.href}
+                                className="flex items-center space-x-2 p-3 hover:bg-neutral-100 rounded-md group"
+                              >
+                                <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover" />
+                                <div>
+                                  <div className="text-sm font-medium">{item.title}</div>
+                                </div>
+                              </a>
+                            </NavigationMenuLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+
+                  {/* Student Zone Dropdown */}
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger>Student Zone</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid w-[400px] gap-3 p-4">
+                        {studentZoneLinks.map((item) => (
+                          <li key={item.title}>
+                            <NavigationMenuLink asChild>
+                              <a
+                                href={item.href}
+                                className="flex items-center space-x-2 p-3 hover:bg-neutral-100 rounded-md group"
+                              >
+                                <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover" />
+                                <div className="text-sm font-medium">{item.title}</div>
+                              </a>
+                            </NavigationMenuLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+
+                  {/* Regular Menu Items */}
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <a href="#courses" className="nav-link">Courses</a>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <a href="#results" className="nav-link">Results</a>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <a href="#contact" className="nav-link">Contact</a>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
             </div>
             <Button className="bg-primary hover:bg-primary-hover text-white">
               Student Login
@@ -116,6 +185,57 @@ const Index = () => {
     </div>
   );
 };
+
+const aboutUsLinks = [
+  {
+    title: "Institute Overview",
+    href: "#overview",
+    icon: Building,
+  },
+  {
+    title: "Mission & Vision",
+    href: "#mission",
+    icon: Award,
+  },
+  {
+    title: "Faculty & Staff",
+    href: "#faculty",
+    icon: Users,
+  },
+  {
+    title: "Infrastructure & Facilities",
+    href: "#infrastructure",
+    icon: Building,
+  },
+  {
+    title: "Testimonials",
+    href: "#testimonials",
+    icon: MessageSquare,
+  },
+];
+
+const studentZoneLinks = [
+  {
+    title: "Study Materials",
+    href: "#materials",
+    icon: Book,
+  },
+  {
+    title: "Video Lectures",
+    href: "#videos",
+    icon: Video,
+  },
+  {
+    title: "Question Bank PDF",
+    href: "#questionbank",
+    icon: FileText,
+  },
+  {
+    title: "News",
+    href: "#news",
+    icon: Newspaper,
+  },
+];
 
 const features = [
   {
