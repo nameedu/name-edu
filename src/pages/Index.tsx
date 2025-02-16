@@ -10,7 +10,13 @@ const Index = () => {
       <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <a href="#" className="text-xl font-bold text-neutral-800">NAME Edu</a>
+            <a href="#" className="flex items-center">
+              <img
+                src="/lovable-uploads/2717d708-aa29-4f6e-adae-571558619133.png"
+                alt="NAME Edu"
+                className="h-8"
+              />
+            </a>
             <div className="hidden md:flex space-x-4">
               <a href="#courses" className="nav-link">Courses</a>
               <a href="#results" className="nav-link">Results</a>
