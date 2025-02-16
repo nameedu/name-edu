@@ -1,4 +1,4 @@
-import { GraduationCap, BookOpen, Award, MessageSquare, Building, Users, FileText, Video, Book, Newspaper } from "lucide-react";
+import { GraduationCap, BookOpen, Award, MessageSquare, Building, Users, FileText, Video, Book, Newspaper, Download, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -30,18 +30,19 @@ const Index = () => {
                   {/* About Us Dropdown */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>About Us</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                    <NavigationMenuContent className="bg-white">
+                      <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 bg-white shadow-lg rounded-lg">
                         {aboutUsLinks.map((item) => (
                           <li key={item.title}>
                             <NavigationMenuLink asChild>
                               <a
                                 href={item.href}
-                                className="flex items-center space-x-2 p-3 hover:bg-neutral-100 rounded-md group"
+                                className="flex items-start space-x-2 p-3 hover:bg-neutral-100 rounded-md group"
                               >
-                                <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover" />
+                                <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
                                 <div>
                                   <div className="text-sm font-medium">{item.title}</div>
+                                  <p className="text-sm text-neutral-600 line-clamp-2">{item.description}</p>
                                 </div>
                               </a>
                             </NavigationMenuLink>
@@ -54,22 +55,77 @@ const Index = () => {
                   {/* Student Zone Dropdown */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>Student Zone</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[400px] gap-3 p-4">
-                        {studentZoneLinks.map((item) => (
-                          <li key={item.title}>
-                            <NavigationMenuLink asChild>
-                              <a
-                                href={item.href}
-                                className="flex items-center space-x-2 p-3 hover:bg-neutral-100 rounded-md group"
-                              >
-                                <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover" />
-                                <div className="text-sm font-medium">{item.title}</div>
-                              </a>
-                            </NavigationMenuLink>
-                          </li>
-                        ))}
-                      </ul>
+                    <NavigationMenuContent className="bg-white">
+                      <div className="grid w-[400px] gap-3 p-4 md:w-[800px] md:grid-cols-3 bg-white shadow-lg rounded-lg">
+                        {/* Study Resources */}
+                        <div className="space-y-4">
+                          <h4 className="font-medium text-sm text-neutral-700 mb-2">Study Resources</h4>
+                          <ul className="space-y-2">
+                            {studentZoneLinks.map((item) => (
+                              <li key={item.title}>
+                                <NavigationMenuLink asChild>
+                                  <a
+                                    href={item.href}
+                                    className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
+                                  >
+                                    <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
+                                    <div>
+                                      <div className="text-sm font-medium">{item.title}</div>
+                                      <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
+                                    </div>
+                                  </a>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Downloads */}
+                        <div className="space-y-4">
+                          <h4 className="font-medium text-sm text-neutral-700 mb-2">Downloads</h4>
+                          <ul className="space-y-2">
+                            {downloadLinks.map((item) => (
+                              <li key={item.title}>
+                                <NavigationMenuLink asChild>
+                                  <a
+                                    href={item.href}
+                                    className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
+                                  >
+                                    <Download className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
+                                    <div>
+                                      <div className="text-sm font-medium">{item.title}</div>
+                                      <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
+                                    </div>
+                                  </a>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Important Links */}
+                        <div className="space-y-4">
+                          <h4 className="font-medium text-sm text-neutral-700 mb-2">Important Links</h4>
+                          <ul className="space-y-2">
+                            {importantLinks.map((item) => (
+                              <li key={item.title}>
+                                <NavigationMenuLink asChild>
+                                  <a
+                                    href={item.href}
+                                    className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
+                                  >
+                                    <Link className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
+                                    <div>
+                                      <div className="text-sm font-medium">{item.title}</div>
+                                      <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
+                                    </div>
+                                  </a>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
 
@@ -191,26 +247,31 @@ const aboutUsLinks = [
     title: "Institute Overview",
     href: "#overview",
     icon: Building,
+    description: "Learn about our history, achievements, and educational philosophy",
   },
   {
     title: "Mission & Vision",
     href: "#mission",
     icon: Award,
+    description: "Discover our goals and commitment to educational excellence",
   },
   {
     title: "Faculty & Staff",
     href: "#faculty",
     icon: Users,
+    description: "Meet our experienced team of educators and administrators",
   },
   {
     title: "Infrastructure & Facilities",
     href: "#infrastructure",
     icon: Building,
+    description: "Explore our state-of-the-art campus and learning facilities",
   },
   {
     title: "Testimonials",
     href: "#testimonials",
     icon: MessageSquare,
+    description: "Read success stories from our students and alumni",
   },
 ];
 
@@ -219,21 +280,61 @@ const studentZoneLinks = [
     title: "Study Materials",
     href: "#materials",
     icon: Book,
+    description: "Access comprehensive study notes and resources",
   },
   {
     title: "Video Lectures",
     href: "#videos",
     icon: Video,
+    description: "Watch recorded lectures and educational content",
   },
   {
     title: "Question Bank PDF",
     href: "#questionbank",
     icon: FileText,
+    description: "Download practice questions and sample papers",
   },
   {
     title: "News",
     href: "#news",
     icon: Newspaper,
+    description: "Stay updated with latest educational news and updates",
+  },
+];
+
+const downloadLinks = [
+  {
+    title: "Assignments",
+    href: "#assignments",
+    description: "Download weekly assignments and worksheets",
+  },
+  {
+    title: "Syllabus",
+    href: "#syllabus",
+    description: "Access course-wise detailed syllabus",
+  },
+  {
+    title: "Previous Papers",
+    href: "#papers",
+    description: "Get last 5 years solved question papers",
+  },
+];
+
+const importantLinks = [
+  {
+    title: "Student Portal",
+    href: "#portal",
+    description: "Access your student dashboard and profile",
+  },
+  {
+    title: "Exam Schedule",
+    href: "#schedule",
+    description: "View upcoming test and exam dates",
+  },
+  {
+    title: "Fee Payment",
+    href: "#payment",
+    description: "Make online fee payments securely",
   },
 ];
 
