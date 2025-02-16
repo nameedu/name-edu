@@ -132,17 +132,42 @@ const Index = () => {
                   {/* Regular Menu Items */}
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                      <a href="#courses" className="nav-link">Courses</a>
+                      <a href="#courses" className="nav-link flex items-center space-x-2">
+                        <GraduationCap className="h-4 w-4" />
+                        <span>Courses</span>
+                      </a>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                      <a href="#results" className="nav-link">Results</a>
+                      <a href="#results" className="nav-link flex items-center space-x-2">
+                        <Award className="h-4 w-4" />
+                        <span>Results</span>
+                      </a>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                      <a href="#contact" className="nav-link">Contact</a>
+                      <a href="#online-form" className="nav-link flex items-center space-x-2">
+                        <FileText className="h-4 w-4" />
+                        <span>Online Form</span>
+                      </a>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <a href="#online-class" className="nav-link flex items-center space-x-2">
+                        <Video className="h-4 w-4" />
+                        <span>Online Class</span>
+                      </a>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <a href="#contact" className="nav-link flex items-center space-x-2">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>Contact</span>
+                      </a>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 </NavigationMenuList>
