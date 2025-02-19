@@ -1,4 +1,3 @@
-
 import { GraduationCap, BookOpen, Award, MessageSquare, Building, Users, FileText, Video, Book, Newspaper, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -32,22 +31,20 @@ const Index = () => {
                   {/* About Us Dropdown */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>About Us</NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white">
+                    <NavigationMenuContent>
                       <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 bg-white shadow-lg rounded-lg">
                         {aboutUsLinks.map((item) => (
                           <li key={item.title}>
-                            <NavigationMenuLink asChild>
-                              <Link
-                                to={item.href}
-                                className="flex items-start space-x-2 p-3 hover:bg-neutral-100 rounded-md group"
-                              >
-                                <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
-                                <div>
-                                  <div className="text-sm font-medium">{item.title}</div>
-                                  <p className="text-sm text-neutral-600 line-clamp-2">{item.description}</p>
-                                </div>
-                              </Link>
-                            </NavigationMenuLink>
+                            <Link
+                              to={item.href}
+                              className="flex items-start space-x-2 p-3 hover:bg-neutral-100 rounded-md group"
+                            >
+                              <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
+                              <div>
+                                <div className="text-sm font-medium">{item.title}</div>
+                                <p className="text-sm text-neutral-600 line-clamp-2">{item.description}</p>
+                              </div>
+                            </Link>
                           </li>
                         ))}
                       </ul>
@@ -57,7 +54,7 @@ const Index = () => {
                   {/* Student Zone Dropdown */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>Student Zone</NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white">
+                    <NavigationMenuContent>
                       <div className="grid w-[400px] gap-3 p-4 md:w-[800px] md:grid-cols-3 bg-white shadow-lg rounded-lg">
                         {/* Study Resources */}
                         <div className="space-y-4">
@@ -65,18 +62,16 @@ const Index = () => {
                           <ul className="space-y-2">
                             {studentZoneLinks.map((item) => (
                               <li key={item.title}>
-                                <NavigationMenuLink asChild>
-                                  <Link
-                                    to={item.href}
-                                    className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
-                                  >
-                                    <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
-                                    <div>
-                                      <div className="text-sm font-medium">{item.title}</div>
-                                      <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
-                                    </div>
-                                  </Link>
-                                </NavigationMenuLink>
+                                <Link
+                                  to={item.href}
+                                  className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
+                                >
+                                  <item.icon className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
+                                  <div>
+                                    <div className="text-sm font-medium">{item.title}</div>
+                                    <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
+                                  </div>
+                                </Link>
                               </li>
                             ))}
                           </ul>
@@ -88,18 +83,16 @@ const Index = () => {
                           <ul className="space-y-2">
                             {downloadLinks.map((item) => (
                               <li key={item.title}>
-                                <NavigationMenuLink asChild>
-                                  <Link
-                                    to={item.href}
-                                    className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
-                                  >
-                                    <Download className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
-                                    <div>
-                                      <div className="text-sm font-medium">{item.title}</div>
-                                      <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
-                                    </div>
-                                  </Link>
-                                </NavigationMenuLink>
+                                <Link
+                                  to={item.href}
+                                  className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
+                                >
+                                  <Download className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
+                                  <div>
+                                    <div className="text-sm font-medium">{item.title}</div>
+                                    <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
+                                  </div>
+                                </Link>
                               </li>
                             ))}
                           </ul>
@@ -111,18 +104,16 @@ const Index = () => {
                           <ul className="space-y-2">
                             {importantLinks.map((item) => (
                               <li key={item.title}>
-                                <NavigationMenuLink asChild>
-                                  <Link
-                                    to={item.href}
-                                    className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
-                                  >
-                                    <Link className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
-                                    <div>
-                                      <div className="text-sm font-medium">{item.title}</div>
-                                      <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
-                                    </div>
-                                  </Link>
-                                </NavigationMenuLink>
+                                <Link
+                                  to={item.href}
+                                  className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
+                                >
+                                  <Download className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
+                                  <div>
+                                    <div className="text-sm font-medium">{item.title}</div>
+                                    <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
+                                  </div>
+                                </Link>
                               </li>
                             ))}
                           </ul>
@@ -133,44 +124,34 @@ const Index = () => {
 
                   {/* Regular Menu Items */}
                   <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link to="/courses" className="nav-link flex items-center space-x-2">
-                        <GraduationCap className="h-4 w-4" />
-                        <span>Courses</span>
-                      </Link>
-                    </NavigationMenuLink>
+                    <Link to="/courses" className="nav-link flex items-center space-x-2 px-3 py-2">
+                      <GraduationCap className="h-4 w-4" />
+                      <span>Courses</span>
+                    </Link>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link to="/results" className="nav-link flex items-center space-x-2">
-                        <Award className="h-4 w-4" />
-                        <span>Results</span>
-                      </Link>
-                    </NavigationMenuLink>
+                    <Link to="/results" className="nav-link flex items-center space-x-2 px-3 py-2">
+                      <Award className="h-4 w-4" />
+                      <span>Results</span>
+                    </Link>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link to="/online-form" className="nav-link flex items-center space-x-2">
-                        <FileText className="h-4 w-4" />
-                        <span>Online Form</span>
-                      </Link>
-                    </NavigationMenuLink>
+                    <Link to="/online-form" className="nav-link flex items-center space-x-2 px-3 py-2">
+                      <FileText className="h-4 w-4" />
+                      <span>Online Form</span>
+                    </Link>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link to="/online-class" className="nav-link flex items-center space-x-2">
-                        <Video className="h-4 w-4" />
-                        <span>Online Class</span>
-                      </Link>
-                    </NavigationMenuLink>
+                    <Link to="/online-class" className="nav-link flex items-center space-x-2 px-3 py-2">
+                      <Video className="h-4 w-4" />
+                      <span>Online Class</span>
+                    </Link>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link to="/contact" className="nav-link flex items-center space-x-2">
-                        <MessageSquare className="h-4 w-4" />
-                        <span>Contact</span>
-                      </Link>
-                    </NavigationMenuLink>
+                    <Link to="/contact" className="nav-link flex items-center space-x-2 px-3 py-2">
+                      <MessageSquare className="h-4 w-4" />
+                      <span>Contact</span>
+                    </Link>
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
