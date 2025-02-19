@@ -11,6 +11,9 @@ import Results from "./pages/Results";
 import OnlineForm from "./pages/OnlineForm";
 import OnlineClass from "./pages/OnlineClass";
 import Contact from "./pages/Contact";
+import StudyMaterials from "./pages/StudyMaterials";
+import VideoLectures from "./pages/VideoLectures";
+import QuestionBank from "./pages/QuestionBank";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +32,9 @@ const App = () => (
           <Route path="/online-form" element={<OnlineForm />} />
           <Route path="/online-class" element={<OnlineClass />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/materials" element={<StudyMaterials />} />
+          <Route path="/videos" element={<VideoLectures />} />
+          <Route path="/questionbank" element={<QuestionBank />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
