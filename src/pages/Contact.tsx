@@ -1,19 +1,18 @@
-
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 
 const Contact = () => {
   return (
-    <div className="min-h-screen">
-      <div className="pt-24 pb-16 px-4">
+    <div className="min-h-screen pb-16">
+      <Header
+        title="Contact Us"
+        subtitle="Get in touch with us for any queries or support"
+      />
+      <div className="py-16 px-4">
         <div className="container mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Contact Us</h1>
-          <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
-            Get in touch with us for any queries or support
-          </p>
-
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             <div>
               <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
