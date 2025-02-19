@@ -1,13 +1,17 @@
-
 import { FileText, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 
 const OnlineForm = () => {
   return (
-    <div className="min-h-screen">
-      <div className="pt-24 pb-16 px-4">
+    <div className="min-h-screen pb-16">
+      <Header
+        title="Online Forms"
+        subtitle="Access and submit your applications online with ease"
+      />
+      <div className="pt-24 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Online Forms</h1>
           <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
