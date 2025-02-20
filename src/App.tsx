@@ -18,6 +18,9 @@ import Contact from "./pages/Contact";
 import StudyMaterials from "./pages/StudyMaterials";
 import VideoLectures from "./pages/VideoLectures";
 import QuestionBank from "./pages/QuestionBank";
+import News from "./pages/News";
+import Assignments from "./pages/Assignments";
+import Syllabus from "./pages/Syllabus";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +46,9 @@ const App = () => (
           <Route path="/materials" element={<StudyMaterials />} />
           <Route path="/videos" element={<VideoLectures />} />
           <Route path="/questionbank" element={<QuestionBank />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/assignments" element={<Assignments />} />
+          <Route path="/syllabus" element={<Syllabus />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
