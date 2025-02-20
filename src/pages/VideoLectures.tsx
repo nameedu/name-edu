@@ -1,16 +1,12 @@
+
 import { Play, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 
 const VideoLectures = () => {
   return (
-    <div className="min-h-screen pb-16">
-      <Header
-        title="Video Lectures"
-        subtitle="Access our recorded video lectures and educational content"
-      />
+    <div className="min-h-screen">
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Video Lectures</h1>

@@ -1,17 +1,13 @@
+
 import { Book, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 
 const StudyMaterials = () => {
   return (
-    <div className="min-h-screen pb-16">
-      <Header
-        title="Study Materials"
-        subtitle="Access comprehensive study materials and resources for your preparation"
-      />
-      <div className="pt-24 px-4">
+    <div className="min-h-screen">
+      <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Study Materials</h1>
           <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">

@@ -1,16 +1,12 @@
+
 import { Building, GraduationCap, Users, Award } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 
 const Overview = () => {
   return (
-    <div className="min-h-screen pb-16">
-      <Header
-        title="Institute Overview"
-        subtitle="Discover our commitment to excellence in education and comprehensive exam preparation"
-      />
-      <div className="pt-24 px-4">
+    <div className="min-h-screen">
+      <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Institute Overview</h1>
           <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
