@@ -1,7 +1,7 @@
 
-import { FileText, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FileText, Download, CheckCircle, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 
 const QuestionBank = () => {
@@ -11,22 +11,46 @@ const QuestionBank = () => {
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Question Bank</h1>
           <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
-            Access comprehensive question banks and practice papers
+            Access our extensive collection of practice questions and previous year papers
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {questions.map((item, index) => (
               <Card key={index} className="p-6">
-                <FileText className="w-12 h-12 text-primary mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p className="text-neutral-600 mb-4">{item.description}</p>
-                <div className="text-sm text-neutral-500 mb-4">
-                  {item.questions} questions • {item.pages} pages
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{item.subject}</h3>
+                        <p className="text-sm text-neutral-500">{item.type}</p>
+                      </div>
+                    </div>
+                    {item.isNew && (
+                      <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                        New
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-3 mb-4 flex-grow">
+                    <div className="flex items-center text-sm">
+                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                      <span>{item.questions} Questions</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <AlertCircle className="w-4 h-4 text-primary mr-2" />
+                      <span>{item.difficulty} Level</span>
+                    </div>
+                  </div>
+
+                  <Button className="w-full" variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download PDF
+                  </Button>
                 </div>
-                <Button className="w-full flex items-center justify-center">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </Button>
               </Card>
             ))}
           </div>
@@ -39,23 +63,47 @@ const QuestionBank = () => {
 
 const questions = [
   {
-    title: "JEE Main Practice Set",
-    description: "Complete practice set with previous year questions and solutions",
-    questions: "500+",
-    pages: "100"
+    subject: "Physics",
+    type: "Previous Year Papers",
+    questions: "150+",
+    difficulty: "Advanced",
+    isNew: true,
   },
   {
-    title: "NEET Question Bank",
-    description: "Comprehensive question bank for NEET preparation",
-    questions: "1000+",
-    pages: "200"
+    subject: "Chemistry",
+    type: "Topic-wise Questions",
+    questions: "200+",
+    difficulty: "Intermediate",
+    isNew: false,
   },
   {
-    title: "Mock Test Series",
-    description: "Series of mock tests with detailed solutions",
+    subject: "Mathematics",
+    type: "Practice Problems",
     questions: "300+",
-    pages: "75"
-  }
+    difficulty: "Mixed",
+    isNew: true,
+  },
+  {
+    subject: "Biology",
+    type: "NEET Questions",
+    questions: "250+",
+    difficulty: "Advanced",
+    isNew: false,
+  },
+  {
+    subject: "Computer Science",
+    type: "Programming Problems",
+    questions: "100+",
+    difficulty: "Intermediate",
+    isNew: false,
+  },
+  {
+    subject: "English",
+    type: "Grammar Exercises",
+    questions: "175+",
+    difficulty: "Basic",
+    isNew: false,
+  },
 ];
 
 export default QuestionBank;
