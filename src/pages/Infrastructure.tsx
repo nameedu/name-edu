@@ -1,5 +1,5 @@
 
-import { Building, Wifi, Desktop, BookOpen, Users, Coffee, Gamepad, Laptop } from "lucide-react";
+import { Building, Wifi, Monitor, BookOpen, Users, Coffee, Gamepad, Laptop } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Footer from "@/components/Footer";
 
@@ -58,7 +58,7 @@ const facilities = [
   {
     title: "Computer Lab",
     description: "Well-equipped computer lab with high-speed internet",
-    icon: Desktop,
+    icon: Monitor,
   },
   {
     title: "Library",
