@@ -6,13 +6,19 @@ const Footer = () => {
     <footer className="bg-neutral-800 text-white pt-16 pb-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* About Section */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">About Us</h3>
-            <p className="text-neutral-300 text-sm leading-relaxed mb-4">
-              We are dedicated to providing quality education and comprehensive exam preparation
-              through expert guidance and innovative teaching methods.
-            </p>
+          {/* Branding Section */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-1">
+            <div className="mb-6">
+              <img
+                src="/lovable-uploads/2717d708-aa29-4f6e-adae-571558619133.png"
+                alt="NAME Edu"
+                className="h-12 mb-4"
+              />
+              <p className="text-neutral-300 text-sm leading-relaxed">
+                Empowering students through quality education and comprehensive exam preparation.
+                Join us in your journey towards academic excellence.
+              </p>
+            </div>
             <div className="space-y-2">
               <a href="tel:+1234567890" className="flex items-center text-sm text-neutral-300 hover:text-white">
                 <Phone className="h-4 w-4 mr-2" />
@@ -33,11 +39,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="#overview" className="text-neutral-300 hover:text-white text-sm">Institute Overview</a></li>
-              <li><a href="#courses" className="text-neutral-300 hover:text-white text-sm">Our Courses</a></li>
-              <li><a href="#faculty" className="text-neutral-300 hover:text-white text-sm">Faculty & Staff</a></li>
-              <li><a href="#results" className="text-neutral-300 hover:text-white text-sm">Results</a></li>
-              <li><a href="#contact" className="text-neutral-300 hover:text-white text-sm">Contact Us</a></li>
+              <li><a href="/overview" className="text-neutral-300 hover:text-white text-sm">Institute Overview</a></li>
+              <li><a href="/courses" className="text-neutral-300 hover:text-white text-sm">Our Courses</a></li>
+              <li><a href="/faculty" className="text-neutral-300 hover:text-white text-sm">Faculty & Staff</a></li>
+              <li><a href="/results" className="text-neutral-300 hover:text-white text-sm">Results</a></li>
+              <li><a href="/contact" className="text-neutral-300 hover:text-white text-sm">Contact Us</a></li>
             </ul>
           </div>
 
@@ -45,11 +51,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Student Resources</h3>
             <ul className="space-y-2">
-              <li><a href="#materials" className="text-neutral-300 hover:text-white text-sm">Study Materials</a></li>
-              <li><a href="#videos" className="text-neutral-300 hover:text-white text-sm">Video Lectures</a></li>
-              <li><a href="#online-form" className="text-neutral-300 hover:text-white text-sm">Online Forms</a></li>
-              <li><a href="#online-class" className="text-neutral-300 hover:text-white text-sm">Online Classes</a></li>
-              <li><a href="#portal" className="text-neutral-300 hover:text-white text-sm">Student Portal</a></li>
+              <li><a href="/materials" className="text-neutral-300 hover:text-white text-sm">Study Materials</a></li>
+              <li><a href="/videos" className="text-neutral-300 hover:text-white text-sm">Video Lectures</a></li>
+              <li><a href="/portal" className="text-neutral-300 hover:text-white text-sm">Student Portal</a></li>
+              <li><a href="/schedule" className="text-neutral-300 hover:text-white text-sm">Exam Schedule</a></li>
+              <li><a href="/payment" className="text-neutral-300 hover:text-white text-sm">Fee Payment</a></li>
             </ul>
           </div>
 
@@ -88,9 +94,20 @@ const Footer = () => {
             </div>
           </div>
         </div>
+
+        {/* Bottom Section */}
         <div className="border-t border-neutral-700 mt-12 pt-8">
-          <div className="text-center text-sm text-neutral-400">
-            <p>© {new Date().getFullYear()} Your Institute Name. All rights reserved.</p>
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="text-sm text-neutral-400">
+              <p>© {new Date().getFullYear()} Your Institute Name. All rights reserved.</p>
+            </div>
+            <div className="mt-4 md:mt-0">
+              <ul className="flex space-x-4 text-sm text-neutral-400">
+                <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-white">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-white">Cookie Policy</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
