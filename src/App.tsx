@@ -21,6 +21,10 @@ import QuestionBank from "./pages/QuestionBank";
 import News from "./pages/News";
 import Assignments from "./pages/Assignments";
 import Syllabus from "./pages/Syllabus";
+import PreviousPapers from "./pages/PreviousPapers";
+import StudentPortal from "./pages/StudentPortal";
+import ExamSchedule from "./pages/ExamSchedule";
+import FeePayment from "./pages/FeePayment";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +53,10 @@ const App = () => (
           <Route path="/news" element={<News />} />
           <Route path="/assignments" element={<Assignments />} />
           <Route path="/syllabus" element={<Syllabus />} />
+          <Route path="/papers" element={<PreviousPapers />} />
+          <Route path="/portal" element={<StudentPortal />} />
+          <Route path="/schedule" element={<ExamSchedule />} />
+          <Route path="/payment" element={<FeePayment />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
