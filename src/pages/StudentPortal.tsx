@@ -1,12 +1,11 @@
-
 import { User, Book, Calendar, CreditCard, FileText, Bell } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Footer from "@/components/Footer";
+import Layout from "@/components/Layout";
 
 const StudentPortal = () => {
   return (
-    <div className="min-h-screen">
+    <Layout>
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
@@ -48,8 +47,7 @@ const StudentPortal = () => {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 

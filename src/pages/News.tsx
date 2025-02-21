@@ -1,11 +1,10 @@
-
 import { Newspaper, Calendar, AlertCircle, Bell } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import Footer from "@/components/Footer";
+import Layout from "@/components/Layout";
 
 const News = () => {
   return (
-    <div className="min-h-screen">
+    <Layout>
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">News & Updates</h1>
@@ -41,8 +40,7 @@ const News = () => {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 

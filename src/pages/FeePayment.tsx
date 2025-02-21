@@ -1,12 +1,11 @@
-
 import { CreditCard, Calendar, Receipt, AlertCircle, CheckCircle, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Footer from "@/components/Footer";
+import Layout from "@/components/Layout";
 
 const FeePayment = () => {
   return (
-    <div className="min-h-screen">
+    <Layout>
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Fee Payment</h1>
@@ -82,8 +81,7 @@ const FeePayment = () => {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 
