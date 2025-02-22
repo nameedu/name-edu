@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Search, FileText, AlertCircle, Upload } from "lucide-react";
+import { Search, FileText, AlertCircle, Upload, Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
@@ -16,10 +16,33 @@ interface StudentResult {
 
 const Results = () => {
   const [searchId, setSearchId] = useState("");
+  const [selectedExam, setSelectedExam] = useState("");
   const [result, setResult] = useState<StudentResult | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [resultsData, setResultsData] = useState<StudentResult[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false); // In a real app, this would come from auth
+  const [adminPassword, setAdminPassword] = useState("");
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const { toast } = useToast();
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, this would be a proper auth check
+    if (adminPassword === "admin123") {
+      setIsAdmin(true);
+      setShowAdminLogin(false);
+      toast({
+        title: "Admin Access Granted",
+        description: "You can now upload result files.",
+      });
+    } else {
+      toast({
+        title: "Access Denied",
+        description: "Invalid admin password.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -59,7 +82,7 @@ const Results = () => {
             };
           });
 
-        setResultsData(results);
+        setResultsData(prevData => [...prevData, ...results]);
         toast({
           title: "CSV File Uploaded",
           description: `Successfully loaded ${results.length} results`,
@@ -74,14 +97,17 @@ const Results = () => {
     setIsSearching(true);
 
     setTimeout(() => {
-      const foundResult = resultsData.find(r => r.candidateId === searchId);
+      const foundResult = resultsData.find(r => 
+        r.candidateId === searchId && 
+        (selectedExam ? r.examId === selectedExam : true)
+      );
       
       if (foundResult) {
         setResult(foundResult);
       } else {
         toast({
           title: "No Results Found",
-          description: "Please check the Candidate ID and try again.",
+          description: "Please check the Candidate ID and Exam ID and try again.",
           variant: "destructive"
         });
         setResult(null);
@@ -90,63 +116,121 @@ const Results = () => {
     }, 500);
   };
 
+  // Get unique exam IDs from the results data
+  const uniqueExams = Array.from(new Set(resultsData.map(r => r.examId)));
+
   return (
     <Layout>
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Exam Results</h1>
           <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
-            Upload results CSV file and search using Candidate ID
+            Search your results by Candidate ID and Exam
           </p>
 
-          {/* CSV Upload */}
-          <Card className="max-w-2xl mx-auto mb-8 p-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Upload Results</h3>
-              <div className="flex items-center gap-4">
+          {/* Admin Login/Upload Section */}
+          {!isAdmin && !showAdminLogin && (
+            <div className="text-center mb-8">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowAdminLogin(true)}
+                className="mx-auto"
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                Admin Login
+              </Button>
+            </div>
+          )}
+
+          {showAdminLogin && !isAdmin && (
+            <Card className="max-w-md mx-auto mb-8 p-6">
+              <form onSubmit={handleAdminLogin} className="space-y-4">
+                <h3 className="text-lg font-semibold mb-4">Admin Login</h3>
                 <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="csv-upload"
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                 />
-                <label
-                  htmlFor="csv-upload"
-                  className="flex items-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors"
-                >
-                  <Upload className="w-5 h-5" />
-                  <span>Choose CSV file</span>
-                </label>
-                <div className="text-sm text-neutral-600">
-                  {resultsData.length > 0 ? `${resultsData.length} results loaded` : "No file uploaded"}
+                <Button type="submit" className="w-full">
+                  Login
+                </Button>
+              </form>
+            </Card>
+          )}
+
+          {/* CSV Upload (Admin Only) */}
+          {isAdmin && (
+            <Card className="max-w-2xl mx-auto mb-8 p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Upload Results</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setIsAdmin(false)}
+                  >
+                    Logout
+                  </Button>
+                </div>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="csv-upload"
+                  />
+                  <label
+                    htmlFor="csv-upload"
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors"
+                  >
+                    <Upload className="w-5 h-5" />
+                    <span>Choose CSV file</span>
+                  </label>
+                  <div className="text-sm text-neutral-600">
+                    {resultsData.length > 0 ? `${resultsData.length} total results loaded` : "No file uploaded"}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           {/* Search Form */}
           <Card className="max-w-2xl mx-auto mb-12 p-6">
             <form onSubmit={handleSearch} className="space-y-4">
-              <div className="flex gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   value={searchId}
                   onChange={(e) => setSearchId(e.target.value)}
                   placeholder="Enter Candidate ID"
-                  className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                 />
-                <Button 
-                  type="submit" 
-                  disabled={!searchId || isSearching || resultsData.length === 0}
-                  className="min-w-[120px]"
+                <select
+                  value={selectedExam}
+                  onChange={(e) => setSelectedExam(e.target.value)}
+                  className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                 >
-                  {isSearching ? "Searching..." : "Search"}
-                </Button>
+                  <option value="">All Exams</option>
+                  {uniqueExams.map((examId) => (
+                    <option key={examId} value={examId}>
+                      {examId}
+                    </option>
+                  ))}
+                </select>
               </div>
+              <Button 
+                type="submit" 
+                disabled={!searchId || isSearching || resultsData.length === 0}
+                className="w-full"
+              >
+                {isSearching ? "Searching..." : "Search Results"}
+              </Button>
               <p className="text-sm text-neutral-500">
                 <AlertCircle className="inline-block w-4 h-4 mr-1" />
-                Upload a CSV file first, then search using Candidate ID
+                Enter your Candidate ID and select an exam to view results
               </p>
             </form>
           </Card>
@@ -202,12 +286,15 @@ const Results = () => {
             </Card>
           )}
 
-          {/* Top Performers Section */}
-          {resultsData.length > 0 && (
+          {/* Top Performers by Exam */}
+          {resultsData.length > 0 && selectedExam && (
             <div className="mt-16">
-              <h2 className="text-2xl font-bold text-center mb-8">Top Performers</h2>
+              <h2 className="text-2xl font-bold text-center mb-8">
+                Top Performers - {selectedExam}
+              </h2>
               <div className="grid md:grid-cols-3 gap-8">
                 {resultsData
+                  .filter(r => r.examId === selectedExam)
                   .sort((a, b) => b.percentage - a.percentage)
                   .slice(0, 3)
                   .map((topper, index) => (
