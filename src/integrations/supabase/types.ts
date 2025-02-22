@@ -9,7 +9,80 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      exam_result_files: {
+        Row: {
+          exam_date: string
+          exam_id: string
+          file_path: string
+          filename: string
+          id: string
+          total_results: number | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          exam_date: string
+          exam_id: string
+          file_path: string
+          filename: string
+          id?: string
+          total_results?: number | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          exam_date?: string
+          exam_id?: string
+          file_path?: string
+          filename?: string
+          id?: string
+          total_results?: number | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      exam_results: {
+        Row: {
+          candidate_id: string
+          created_at: string | null
+          exam_id: string
+          exam_mark: number
+          exam_rank: string
+          file_id: string | null
+          id: string
+          percentage: number
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string | null
+          exam_id: string
+          exam_mark: number
+          exam_rank: string
+          file_id?: string | null
+          id?: string
+          percentage: number
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string | null
+          exam_id?: string
+          exam_mark?: number
+          exam_rank?: string
+          file_id?: string | null
+          id?: string
+          percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_results_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "exam_result_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
