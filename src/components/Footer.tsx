@@ -22,15 +22,15 @@ const Footer = () => {
             <div className="space-y-2">
               <a href="tel:+1234567890" className="flex items-center text-sm text-neutral-300 hover:text-white">
                 <Phone className="h-4 w-4 mr-2" />
-                +1 (234) 567-890
+                +977 1 5331144
               </a>
               <a href="mailto:info@example.com" className="flex items-center text-sm text-neutral-300 hover:text-white">
                 <Mail className="h-4 w-4 mr-2" />
-                info@example.com
+                info@name.edu.np
               </a>
               <div className="flex items-center text-sm text-neutral-300">
                 <MapPin className="h-4 w-4 mr-2" />
-                123 Education Street, City
+                NAME Building, Ramshah Path, Putalisadak
               </div>
             </div>
           </div>

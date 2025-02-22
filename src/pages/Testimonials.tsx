@@ -22,7 +22,6 @@ const Testimonials = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold">{testimonial.name}</h3>
-                        <p className="text-sm text-neutral-500">{testimonial.course}</p>
                       </div>
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
@@ -73,39 +72,39 @@ const Testimonials = () => {
 
 const testimonials = [
   {
-    name: "Alex Thompson",
+    name: "Avhi",
     course: "JEE Advanced Preparation",
-    content: "The quality of teaching and study materials provided here is exceptional. The faculty's dedication helped me achieve my dream rank.",
-    rating: 5,
-  },
-  {
-    name: "Priya Sharma",
-    course: "NEET Preparation",
-    content: "The systematic approach to preparation and regular mock tests helped me build confidence. Grateful for the guidance!",
-    rating: 5,
-  },
-  {
-    name: "John Martinez",
-    course: "Foundation Course",
-    content: "Starting early with the foundation course gave me a strong base. The concepts are explained thoroughly with practical examples.",
+    content: "This is the best place for medical entrance preparation. They teach with their best. They explain all the topics in the understandable ways. They provide all the required materials.",
     rating: 4,
   },
   {
-    name: "Sarah Wilson",
+    name: "시진",
+    course: "NEET Preparation",
+    content: "It's no doubt Name institute is one of finest institute of medical entrance preparation in our country.Here,you can get all type of quality educator and better education.",
+    rating: 4,
+  },
+  {
+    name: "Aman Kumar Shah",
+    course: "Foundation Course",
+    content: "This institute is best for MEDICAL PREPARATION . Here you can get a good environment for study, friendly teacher teams and others institute teams, a well managed library for study and a quality full study.",
+    rating: 4,
+  },
+  {
+    name: "Pratibha Chaudhary",
     course: "Crash Course",
-    content: "Even though I joined late, the crash course helped me cover all important topics effectively. Thank you for the support!",
+    content: "If you want to get daily question practice for medical entrance exams, nursing, and lokesewa. This institute is ideal for them.",
     rating: 5,
   },
   {
-    name: "Rahul Patel",
+    name: "Om Shankar Gupta",
     course: "GATE Preparation",
-    content: "The online resources and doubt clearing sessions were incredibly helpful. Secured a good rank thanks to the guidance.",
+    content: "One of the best institute in the country. Good education with Good environment. You can achieve your goals through this institute. It provides best learning facilities with best tutors.",
     rating: 5,
   },
   {
-    name: "Emily Brown",
+    name: "Dipal Malla",
     course: "SAT Preparation",
-    content: "The personalized attention and strategy sessions made all the difference. Highly recommend their SAT prep program.",
+    content: "Nepal's top bridge course institution for various courses, that has been providing its service for a long time. It has its own building with very big room",
     rating: 4,
   },
 ];

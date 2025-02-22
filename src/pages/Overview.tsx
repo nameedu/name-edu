@@ -25,11 +25,8 @@ const Overview = () => {
           <div className="space-y-16">
             <section>
               <h2 className="text-3xl font-bold mb-6">Our Legacy</h2>
-              <p className="text-lg text-neutral-600 leading-relaxed">
-                Founded in 2000, our institute has been at the forefront of educational excellence,
-                helping thousands of students achieve their academic and career goals through
-                comprehensive coaching and mentorship programs.
-              </p>
+              <p className="text-lg text-neutral-600 leading-relaxed text-justify">
+              It all began in 1996 with just two rented rooms in Putalisadak, opposite Shanker Dev Campus. At that time, finding qualified teachers for medical entrance preparation was a significant challenge. There were no entrance guides, and no fixed syllabus to follow. Over the past 25 years, we have witnessed the emergence of over 20 highly skilled teachers and a variety of entrance guides that now rival any Indian textbook. In 2006, NAME moved into its own building, and since then, it has experienced growth and progress in every aspect.</p>
             </section>
 
             <section>
@@ -55,7 +52,7 @@ const stats = [
   {
     icon: Users,
     value: "10,000+",
-    label: "Students Trained",
+    label: "Students Every Year",
   },
   {
     icon: GraduationCap,
@@ -64,7 +61,7 @@ const stats = [
   },
   {
     icon: Building,
-    value: "20+",
+    value: "29+",
     label: "Years Experience",
   },
   {
@@ -76,7 +73,7 @@ const stats = [
 
 const achievements = [
   {
-    title: "Best Coaching Institute 2023",
+    title: "Best Coaching Institute",
     description: "Recognized for excellence in educational services and student outcomes.",
   },
   {

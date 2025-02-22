@@ -90,7 +90,7 @@ const Index = () => {
               <div className="aspect-[4/5] bg-white/10 rounded-xl backdrop-blur-sm">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <img 
-                    src="/placeholder.svg" 
+                    src="Images/name-app1.png" 
                     alt="Mobile App Preview" 
                     className="w-64"
                   />
@@ -131,48 +131,6 @@ const Index = () => {
                 <Button className="w-full">Enroll Now</Button>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="py-20 bg-neutral-50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Get in Touch</h2>
-          <p className="text-lg text-neutral-600 max-w-2xl mx-auto mb-12">
-            Have questions about our medical entrance preparation programs? We're here to help!
-          </p>
-          <div className="flex justify-center">
-            <Card className="w-full max-w-lg p-8">
-              <form className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-700">Name</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                    placeholder="Your name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-700">Email</label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                    placeholder="Your email"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-700">Message</label>
-                  <textarea
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none h-32"
-                    placeholder="Your message"
-                  />
-                </div>
-                <Button className="w-full bg-primary hover:bg-primary-hover text-white">
-                  Send Message
-                </Button>
-              </form>
-            </Card>
           </div>
         </div>
       </section>

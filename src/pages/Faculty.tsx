@@ -21,17 +21,7 @@ const Faculty = () => {
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{member.name}</h3>
                   <p className="text-primary font-medium mb-2">{member.designation}</p>
-                  <p className="text-neutral-600 text-sm mb-4">{member.expertise}</p>
-                  <div className="flex items-center justify-center space-x-2">
-                    {member.qualifications.map((qualification, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
-                      >
-                        {qualification}
-                      </span>
-                    ))}
-                  </div>
+                  
                 </div>
               </Card>
             ))}
@@ -44,40 +34,44 @@ const Faculty = () => {
 
 const facultyMembers = [
   {
-    name: "Dr. Sarah Johnson",
-    designation: "Senior Physics Faculty",
-    expertise: "Quantum Mechanics & Electromagnetic Theory",
-    qualifications: ["Ph.D.", "M.Sc", "B.Ed"],
+    name: "Dr. Navin Sharma",
+    designation: "Director",
+    
   },
   {
-    name: "Prof. Michael Chen",
-    designation: "Mathematics Expert",
-    expertise: "Advanced Calculus & Linear Algebra",
-    qualifications: ["M.Phil", "M.Sc"],
+    name: "Rabindra Sharma",
+    designation: "Chief Executive Officer",
+    
   },
   {
-    name: "Dr. Emily Williams",
-    designation: "Chemistry Faculty",
-    expertise: "Organic Chemistry & Physical Chemistry",
-    qualifications: ["Ph.D.", "M.Sc"],
+    name: "Suman Sharma",
+    designation: "Chairman",
+    
   },
   {
-    name: "Prof. David Miller",
-    designation: "Biology Faculty",
-    expertise: "Molecular Biology & Genetics",
-    qualifications: ["M.Sc", "B.Ed"],
+    name: "Netra Pokhrel",
+    designation: "Administrative Officer",
+   
   },
   {
-    name: "Dr. Robert Wilson",
-    designation: "English Faculty",
-    expertise: "Literature & Communication Skills",
-    qualifications: ["Ph.D.", "M.A"],
+    name: "Sujan Dhungel",
+    designation: "Finance Chief",
+   
   },
   {
-    name: "Prof. Amanda Brown",
-    designation: "Computer Science Faculty",
-    expertise: "Programming & Data Structures",
-    qualifications: ["M.Tech", "B.Tech"],
+    name: "Bidur Bhattarai",
+    designation: "Counselor",
+   
+  },
+  {
+    name: "Achyut Kandel",
+    designation: "Accountant",
+   
+  },
+  {
+    name: "Udesh Shrestha",
+    designation: "System Administrator",
+   
   },
 ];
 

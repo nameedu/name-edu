@@ -78,22 +78,22 @@ const Contact = () => {
 const contactInfo = [
   {
     title: "Phone",
-    details: "+1 (234) 567-890",
+    details: "+977 1 5331144",
     icon: Phone
   },
   {
     title: "Email",
-    details: "info@example.com",
+    details: "info@name.edu.np",
     icon: Mail
   },
   {
     title: "Address",
-    details: "123 Education Street, City, State, 12345",
+    details: "NAME Building, Ramshah Path, Putalisadak",
     icon: MapPin
   },
   {
     title: "Office Hours",
-    details: "Monday - Saturday: 9:00 AM - 6:00 PM",
+    details: "Everyday: 06:00 AM - 6:00 PM",
     icon: Clock
   }
 ];
