@@ -26,6 +26,7 @@ import StudentPortal from "./pages/StudentPortal";
 import ExamSchedule from "./pages/ExamSchedule";
 import FeePayment from "./pages/FeePayment";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/portal" element={<StudentPortal />} />
           <Route path="/schedule" element={<ExamSchedule />} />
           <Route path="/payment" element={<FeePayment />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
