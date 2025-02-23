@@ -183,29 +183,37 @@ const ListResult = () => {
 
   const handleDeleteFile = async (fileId: string) => {
     try {
-      // Delete results first (cascade will handle this in DB)
-      await supabase
+      // Delete results first (cascade should handle this in DB)
+      const { data: resultsData, error: resultsError } = await supabase
         .from('exam_results')
         .delete()
         .eq('file_id', fileId);
-
+  
+      if (resultsError) throw resultsError;
+  
+      console.log("Deleted exam results:", resultsData);
+  
       // Delete file metadata
-      const { error } = await supabase
+      const { data: fileData, error: fileError } = await supabase
         .from('exam_result_files')
         .delete()
         .eq('id', fileId);
-
-      if (error) throw error;
-
+  
+      if (fileError) throw fileError;
+  
+      console.log("Deleted file metadata:", fileData);
+  
       toast({
         title: "Success",
         description: "File and associated results deleted successfully",
       });
-
+  
       // Refresh data
       await Promise.all([fetchExamFiles(), fetchResults()]);
-
+  
     } catch (error) {
+      console.error("Error during deletion:", error);  // Added error logging for debugging
+  
       toast({
         title: "Error deleting file",
         description: error.message,
@@ -213,7 +221,7 @@ const ListResult = () => {
       });
     }
   };
-
+  
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSearching(true);
