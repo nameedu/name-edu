@@ -15,6 +15,38 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const getUserRole = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user role:', error);
+      return 'student'; // Default role
+    }
+
+    return data?.role || 'student';
+  };
+
+  const handleRoleBasedRedirect = async (userId: string) => {
+    const role = await getUserRole(userId);
+    
+    switch (role) {
+      case 'admin':
+        navigate('/admin');
+        break;
+      case 'teacher':
+        navigate('/teacher');
+        break;
+      case 'student':
+      default:
+        navigate('/portal');
+        break;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -28,7 +60,7 @@ const Auth = () => {
       if (error) throw error;
 
       // Try to sign in after sign up
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -40,13 +72,16 @@ const Auth = () => {
         description: "Logged in successfully",
       });
 
-      // Redirect to results page
-      navigate("/results");
+      // Redirect based on role
+      if (signInData.user) {
+        await handleRoleBasedRedirect(signInData.user.id);
+      }
+
     } catch (error: any) {
       // If user already exists, try to sign in directly
       if (error.message.includes("already registered")) {
         try {
-          const { error: signInError } = await supabase.auth.signInWithPassword({
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password,
           });
@@ -58,8 +93,10 @@ const Auth = () => {
             description: "Logged in successfully",
           });
 
-          // Redirect to results page
-          navigate("/results");
+          // Redirect based on role
+          if (signInData.user) {
+            await handleRoleBasedRedirect(signInData.user.id);
+          }
           return;
         } catch (signInError: any) {
           toast({
@@ -85,7 +122,7 @@ const Auth = () => {
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <Card className="max-w-md mx-auto p-6">
-            <h1 className="text-2xl font-bold text-center mb-6">Admin Login</h1>
+            <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium">
@@ -99,7 +136,7 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                    placeholder="admin@example.com"
+                    placeholder="email@example.com"
                     required
                   />
                 </div>
