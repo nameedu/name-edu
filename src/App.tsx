@@ -27,6 +27,8 @@ import FeePayment from "./pages/FeePayment";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/admin/Dashboard";
+import SignUp from "./pages/SignUp";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,8 @@ const App = () => (
           <Route path="/schedule" element={<ExamSchedule />} />
           <Route path="/payment" element={<FeePayment />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/results" element={<Results />} />
