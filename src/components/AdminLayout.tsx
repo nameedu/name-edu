@@ -12,7 +12,9 @@ import {
   Calendar,
   Menu,
   LogOut,
-  X
+  X,
+  Plus,
+  List
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -61,6 +63,18 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       title: "Results",
       icon: FileText,
       href: "/admin/results",
+      subItems: [
+        {
+          title: "Add New Result",
+          icon: Plus,
+          href: "/admin/results/add",
+        },
+        {
+          title: "View Result List",
+          icon: List,
+          href: "/admin/results/list",
+        },
+      ],
     },
     {
       title: "Study Materials",
@@ -116,17 +130,38 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <ul className="space-y-1">
               {menuItems.map((item) => (
                 <li key={item.href}>
-                  <Link
-                    to={item.href}
-                    className={`flex items-center px-4 py-2 rounded-lg ${
-                      location.pathname === item.href
-                        ? "bg-primary text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5 mr-3" />
-                    {item.title}
-                  </Link>
+                  <div className="space-y-1">
+                    <Link
+                      to={item.href}
+                      className={`flex items-center px-4 py-2 rounded-lg ${
+                        location.pathname === item.href
+                          ? "bg-primary text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5 mr-3" />
+                      {item.title}
+                    </Link>
+                    {item.subItems && (
+                      <ul className="ml-6 space-y-1">
+                        {item.subItems.map((subItem) => (
+                          <li key={subItem.href}>
+                            <Link
+                              to={subItem.href}
+                              className={`flex items-center px-4 py-2 rounded-lg text-sm ${
+                                location.pathname === subItem.href
+                                  ? "bg-primary/10 text-primary"
+                                  : "text-gray-600 hover:bg-gray-50"
+                              }`}
+                            >
+                              <subItem.icon className="h-4 w-4 mr-2" />
+                              {subItem.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
