@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +26,7 @@ import ExamSchedule from "./pages/ExamSchedule";
 import FeePayment from "./pages/FeePayment";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Dashboard from "./pages/admin/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +59,10 @@ const App = () => (
           <Route path="/schedule" element={<ExamSchedule />} />
           <Route path="/payment" element={<FeePayment />} />
           <Route path="/auth" element={<Auth />} />
+          
+          <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin/results" element={<Results />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
