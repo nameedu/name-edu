@@ -2,7 +2,7 @@
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { GraduationCap, BookOpen, Award, MessageSquare, Star, Target, Timer, Users, Smartphone, Apple } from "lucide-react";
+import { GraduationCap, BookOpen, MessageSquare, Target, Timer, Users, Smartphone, Apple } from "lucide-react";
 
 const Index = () => {
   return (
@@ -20,10 +20,14 @@ const Index = () => {
             Comprehensive MBBS entrance exam preparation with expert guidance, proven study materials, and the highest success rate in Nepal.
           </p>
           <div className="animate-fade-in opacity-0 [--delay:800ms] flex flex-wrap justify-center gap-4">
-            <Button className="bg-primary hover:bg-primary-hover text-white px-8 py-6">
+            <Button 
+            onClick={() => window.location.href = '/courses'}
+            className="bg-primary hover:bg-primary-hover text-white px-8 py-6">
               Start Your Journey
             </Button>
-            <Button variant="outline" className="px-8 py-6">
+            <Button 
+            onClick={() => window.location.href = '/contact'}
+            variant="outline" className="px-8 py-6">
               Book Free Counseling
             </Button>
           </div>
@@ -73,14 +77,25 @@ const Index = () => {
                 Download our mobile app to access study materials, video lectures, and practice tests anytime, anywhere. Stay updated with your course progress and upcoming exams.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button variant="outline" className="bg-black text-white border-white hover:bg-white hover:text-black">
-                  <Apple className="mr-2 h-5 w-5" />
-                  Download for iOS
-                </Button>
-                <Button variant="outline" className="bg-black text-white border-white hover:bg-white hover:text-black">
-                  <Smartphone className="mr-2 h-5 w-5" />
-                  Download for Android
-                </Button>
+                
+                <Button
+    onClick={() => window.location.href = 'https://apps.apple.com/us/app/name-online/id1524191391'}
+    variant="outline"
+    className="bg-black text-white border-white hover:bg-white hover:text-black"
+>
+    <Apple className="mr-2 h-5 w-5" />
+    Download for iOS
+</Button>
+
+                <Button
+  onClick={() => window.location.href = 'https://play.google.com/store/apps/details?id=com.avyaas.nameonline&hl=en_US'}
+  variant="outline"
+  className="bg-black text-white border-white hover:bg-white hover:text-black"
+>
+  <Smartphone className="mr-2 h-5 w-5" />
+  Download for Android
+</Button>
+
               </div>
               <div className="mt-6 text-sm text-white/80">
                 Available on all devices. Free download for registered students.
@@ -104,9 +119,9 @@ const Index = () => {
       {/* Upcoming Batches */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Upcoming Batches</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Our Courses</h2>
           <p className="text-lg text-neutral-600 text-center max-w-2xl mx-auto mb-12">
-            Join our new batches starting soon and begin your medical journey
+          Comprehensive courses designed to help you excel in your academic journey
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {upcomingBatches.map((batch, index) => (
@@ -116,19 +131,16 @@ const Index = () => {
                     <h3 className="text-xl font-semibold">{batch.name}</h3>
                     <p className="text-neutral-600">{batch.timing}</p>
                   </div>
-                  <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                    {batch.seats} seats left
-                  </span>
                 </div>
                 <ul className="space-y-2 mb-6">
                   {batch.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center text-neutral-600">
-                      <Star className="w-4 h-4 text-primary mr-2" />
+                      <BookOpen className="w-4 h-4 text-primary mr-2" />
                       {feature}
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full">Enroll Now</Button>
+                <Button className="w-full">Learn More</Button>
               </Card>
             ))}
           </div>
@@ -180,36 +192,35 @@ const features = [
 
 const upcomingBatches = [
   {
-    name: "Early Bird Batch",
-    timing: "Starting from June 1st",
-    seats: 20,
+    name: "Medical Entrance",
+    timing: "Comprehensive preparation for medical field entrances",
     features: [
-      "Complete syllabus coverage",
-      "Daily mock tests",
-      "Personal mentoring",
-      "Study materials included",
+      "MBBS",
+      "BDS",
+      "BSc Nursing",
+      "BPH",
+      "B Pharmacy",
     ],
   },
   {
-    name: "Regular Batch",
-    timing: "Starting from July 1st",
-    seats: 30,
+    name: "Allied Health Sciences",
+    timing: "Specialized preparation for health science programs",
     features: [
-      "Flexible timing options",
-      "Weekly mock tests",
-      "Group discussions",
-      "Online access to resources",
+      "B Optometry",
+      "BPT",
+      "BASLP",
+      "BMIT",
+      "BMLT",
     ],
   },
   {
-    name: "Crash Course",
-    timing: "Starting from August 1st",
-    seats: 25,
+    name: "Agriculture & Technology",
+    timing: "Expert guidance for technical and agricultural entrances",
     features: [
-      "Intensive preparation",
-      "Daily problem solving",
-      "Topic-wise tests",
-      "Previous year analysis",
+      "B Tech",
+      "B Forestry",
+      "B Veterinary",
+      "BSc Agriculture",
     ],
   },
 ];
