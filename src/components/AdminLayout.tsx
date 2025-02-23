@@ -62,17 +62,17 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     {
       title: "Results",
       icon: FileText,
-      href: "/admin/results",
+      href: "#",
       subItems: [
         {
           title: "Add New Result",
           icon: Plus,
-          href: "/admin/results/add",
+          href: "/admin/add-result",
         },
         {
           title: "View Result List",
           icon: List,
-          href: "/admin/results/list",
+          href: "/admin/results",
         },
       ],
     },

@@ -28,6 +28,8 @@ import FeePayment from "./pages/FeePayment";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/admin/Dashboard";
+import AddResult from "./pages/admin/AddResult";
+import ListResult from "./pages/admin/ListResult";
 import SignUp from "./pages/SignUp";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -67,10 +69,8 @@ const App = () => (
           
           {/* Admin Routes */}
           <Route path="/admin" element={<Dashboard />} />
-          <Route path="/admin/results" element={<Results />} />
-          <Route path="/admin/results/add" element={<Results />} />
-          <Route path="/admin/results/list" element={<Results />} />
-          
+          <Route path="/admin/add-result" element={<AddResult/>} />
+          <Route path="/admin/results" element={<ListResult/>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

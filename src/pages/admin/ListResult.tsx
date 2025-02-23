@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Search, FileText, AlertCircle, Upload, Lock, Trash2, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Layout from "@/components/Layout";
+import AdminLayout from "@/components/AdminLayout";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -25,7 +25,7 @@ interface ExamFile {
   total_results: number;
 }
 
-const Results = () => {
+const ListResult = () => {
   const [searchId, setSearchId] = useState("");
   const [selectedExam, setSelectedExam] = useState("");
   const [result, setResult] = useState<StudentResult | null>(null);
@@ -241,60 +241,29 @@ const Results = () => {
 
   if (isLoading) {
     return (
-      <Layout>
+      <AdminLayout>
         <div className="pt-24 pb-16 px-4">
           <div className="container mx-auto text-center">
             Loading...
           </div>
         </div>
-      </Layout>
+      </AdminLayout>
     );
   }
 
   return (
-    <Layout>
+    <AdminLayout>
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Exam Results</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Results List</h1>
           <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
-            Search your results by Candidate ID and Exam
+            List of the uploaded File
           </p>
 
           {/* Admin Dashboard */}
-          {isAdmin && (
+          
             <Card className="max-w-4xl mx-auto mb-12 p-6">
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold">Admin Dashboard</h2>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => supabase.auth.signOut()}
-                  >
-                    Logout
-                  </Button>
-                </div>
-
-                {/* File Upload Section */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Upload Results</h3>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="file"
-                      accept=".csv"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="csv-upload"
-                    />
-                    <label
-                      htmlFor="csv-upload"
-                      className="flex items-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary transition-colors"
-                    >
-                      <Upload className="w-5 h-5" />
-                      <span>Choose CSV file</span>
-                    </label>
-                  </div>
-                </div>
-
                 {/* Uploaded Files List */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Uploaded Files</h3>
@@ -333,126 +302,11 @@ const Results = () => {
                   </div>
                 </div>
               </div>
-            </Card>
-          )}
-          {/* Search Form */}
-          <Card className="max-w-2xl mx-auto mb-12 p-6">
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  value={searchId}
-                  onChange={(e) => setSearchId(e.target.value)}
-                  placeholder="Enter Candidate ID"
-                  className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                />
-                <select
-                  value={selectedExam}
-                  onChange={(e) => setSelectedExam(e.target.value)}
-                  className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                >
-                  <option value="">All Exams</option>
-                  {uniqueExams.map((examId) => (
-                    <option key={examId} value={examId}>
-                      {examId}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <Button 
-                type="submit" 
-                disabled={!searchId || isSearching || resultsData.length === 0}
-                className="w-full"
-              >
-                {isSearching ? "Searching..." : "Search Results"}
-              </Button>
-              <p className="text-sm text-neutral-500">
-                <AlertCircle className="inline-block w-4 h-4 mr-1" />
-                Enter your Candidate ID and select an exam to view results
-              </p>
-            </form>
-          </Card>
-
-          {/* Result Display */}
-          {result && (
-            <Card className="max-w-2xl mx-auto p-6 animate-fade-in">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-1">Result Details</h2>
-                  <p className="text-neutral-600">Candidate ID: {result.candidateId}</p>
-                  <p className="text-neutral-600">Exam ID: {result.examId}</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold text-primary mb-1">Rank {result.examRank}</div>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-4">Exam Score</h3>
-                  <div className="bg-primary/5 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-primary mb-1">
-                      {result.examMark}
-                    </div>
-                    <div className="text-neutral-600">Marks</div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-4">Percentage</h3>
-                  <div className={`rounded-lg p-4 text-center ${
-                    result.percentage >= 50 ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    <div className={`text-3xl font-bold mb-1 ${
-                      result.percentage >= 50 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {result.percentage}%
-                    </div>
-                    <div className="text-neutral-600">
-                      {result.percentage >= 50 ? 'Passed' : 'Failed'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-6 border-t">
-                <Button variant="outline" className="w-full">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Download Result PDF
-                </Button>
-              </div>
-            </Card>
-          )}
-
-          {/* Top Performers by Exam */}
-          {resultsData.length > 0 && selectedExam && (
-            <div className="mt-16">
-              <h2 className="text-2xl font-bold text-center mb-8">
-                Top Performers - {selectedExam}
-              </h2>
-              <div className="grid md:grid-cols-3 gap-8">
-                {resultsData
-                  .filter(r => r.examId === selectedExam)
-                  .sort((a, b) => b.percentage - a.percentage)
-                  .slice(0, 3)
-                  .map((topper, index) => (
-                    <Card key={index} className="p-6">
-                      <div className="text-center mb-4">
-                        <div className="w-16 h-16 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center">
-                          <span className="text-2xl font-bold text-primary">#{index + 1}</span>
-                        </div>
-                        <h3 className="text-xl font-semibold">Mark: {topper.examMark}</h3>
-                        <p className="text-neutral-600">Percentage: {topper.percentage}%</p>
-                      </div>
-                    </Card>
-                  ))}
-              </div>
-            </div>
-          )}
+            </Card> 
         </div>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 };
 
-export default Results;
+export default ListResult;
