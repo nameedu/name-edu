@@ -72,7 +72,7 @@ const App = () => (
           <Route path="/admin" element={<AdminGuard><Dashboard /></AdminGuard>} />
           <Route path="/admin/results/list" element={<AdminGuard><ListResult /></AdminGuard>} />
           <Route path="/admin/results/add" element={<AdminGuard><AddResult /></AdminGuard>} />
-          <Route path="/admin/results" element={<AdminGuard><ListResult /></AdminGuard>} />
+          <Route path="/admin/results" element={<Navigate to="/admin/results/list" replace />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>

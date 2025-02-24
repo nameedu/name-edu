@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { FileText, Calendar, Trash2, AlertCircle } from "lucide-react";
+import { FileText, Calendar, Trash2, AlertCircle, Search, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AdminLayout from "@/components/AdminLayout";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 
 interface ExamFile {
   id: string;
@@ -21,6 +22,7 @@ const ListResult = () => {
   const [uploadedFiles, setUploadedFiles] = useState<ExamFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeletingFile, setIsDeletingFile] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -77,7 +79,6 @@ const ListResult = () => {
         description: "File and associated results deleted successfully",
       });
 
-      // Update the UI
       setUploadedFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
 
     } catch (error: any) {
@@ -91,44 +92,91 @@ const ListResult = () => {
     }
   };
 
+  const filteredFiles = uploadedFiles.filter(file =>
+    file.exam_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    file.filename.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <AdminLayout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Manage Results</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Results Management</h1>
+            <p className="text-gray-600 mt-1">View and manage uploaded exam results</p>
+          </div>
+          <Link to="/admin/results/add">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Results
+            </Button>
+          </Link>
+        </div>
+
+        <Card className="mb-6">
+          <div className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="text"
+                placeholder="Search by exam ID or filename..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              />
+            </div>
+          </div>
+        </Card>
 
         {isLoading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading files...</p>
+            <p className="mt-4 text-gray-600">Loading results...</p>
           </div>
-        ) : uploadedFiles.length === 0 ? (
+        ) : filteredFiles.length === 0 ? (
           <Card className="p-8 text-center">
             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No Results Uploaded</h2>
+            <h2 className="text-xl font-semibold mb-2">
+              {searchTerm ? "No matching results found" : "No Results Uploaded"}
+            </h2>
             <p className="text-gray-600 mb-4">
-              Upload your first results file to get started
+              {searchTerm 
+                ? "Try adjusting your search terms"
+                : "Upload your first results file to get started"}
             </p>
-            <Button onClick={() => window.location.href = '/admin/results/add'}>
-              Upload Results
-            </Button>
+            {!searchTerm && (
+              <Link to="/admin/results/add">
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Upload Results
+                </Button>
+              </Link>
+            )}
           </Card>
         ) : (
           <div className="grid gap-4">
-            {uploadedFiles.map((file) => (
-              <Card key={file.id} className="p-4">
+            {filteredFiles.map((file) => (
+              <Card key={file.id} className="p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <FileText className="w-5 h-5 text-primary" />
                       <span className="font-medium">{file.filename}</span>
                     </div>
                     <div className="text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {format(new Date(file.uploaded_at), 'PPp')}
-                      </span>
-                      <div className="mt-1">
-                        Exam ID: {file.exam_id} • Total Results: {file.total_results}
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {format(new Date(file.uploaded_at), 'PPp')}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+                          Exam ID: {file.exam_id}
+                        </span>
+                        <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                          {file.total_results} Results
+                        </span>
                       </div>
                     </div>
                   </div>
