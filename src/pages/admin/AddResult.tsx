@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Upload, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import AdminLayout from "@/components/AdminLayout";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +27,6 @@ const AddResult = () => {
     const lines = text.split('\n');
     const headers = lines[0].split(',').map(header => header.trim());
     
-    // Validate CSV structure
     const requiredHeaders = ['Candidate ID', 'Exam ID', 'Exam Mark', 'Exam Rank', 'Percentage'];
     const hasValidHeaders = requiredHeaders.every(header => 
       headers.includes(header)
@@ -56,7 +55,6 @@ const AddResult = () => {
     if (!file) return;
 
     try {
-      // Validate file type
       if (!file.name.endsWith('.csv')) {
         throw new Error('Please upload a CSV file');
       }
@@ -64,7 +62,7 @@ const AddResult = () => {
       const results = await parseCSV(file);
       setParsedResults(results);
       setSelectedFile(file);
-      setVerificationChecked(false); // Reset verification when new file is selected
+      setVerificationChecked(false);
     } catch (error: any) {
       toast({
         title: "Error parsing file",
@@ -85,14 +83,12 @@ const AddResult = () => {
       const fileExt = selectedFile.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${fileExt}`;
       
-      // Upload file to storage
       const { error: uploadError } = await supabase.storage
         .from('exam_results')
         .upload(filePath, selectedFile);
 
       if (uploadError) throw uploadError;
 
-      // Insert file metadata
       const { data: fileData, error: fileError } = await supabase
         .from('exam_result_files')
         .insert({
@@ -107,7 +103,6 @@ const AddResult = () => {
 
       if (fileError) throw fileError;
 
-      // Insert results with file reference
       const { error: resultsError } = await supabase
         .from('exam_results')
         .insert(
@@ -124,7 +119,6 @@ const AddResult = () => {
         description: `Uploaded ${parsedResults.length} results successfully`,
       });
 
-      // Reset form
       setSelectedFile(null);
       setParsedResults([]);
       setVerificationChecked(false);
