@@ -25,10 +25,6 @@ const ListResult = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchExamFiles();
-  }, []);
-
   const fetchExamFiles = async () => {
     try {
       const { data, error } = await supabase
@@ -37,7 +33,6 @@ const ListResult = () => {
         .order('uploaded_at', { ascending: false });
 
       if (error) throw error;
-
       setUploadedFiles(data || []);
     } catch (error: any) {
       toast({
@@ -50,6 +45,10 @@ const ListResult = () => {
     }
   };
 
+  useEffect(() => {
+    fetchExamFiles();
+  }, []);
+
   const handleDeleteFile = async (fileId: string) => {
     if (!confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
       return;
@@ -58,7 +57,7 @@ const ListResult = () => {
     setIsDeletingFile(fileId);
 
     try {
-      // First, delete the results
+      // First, delete all results associated with this file
       const { error: resultsError } = await supabase
         .from('exam_results')
         .delete()
@@ -74,7 +73,7 @@ const ListResult = () => {
 
       if (fileError) throw fileError;
 
-      // Remove the file from state only after successful deletion
+      // Update local state to remove the deleted file
       setUploadedFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
 
       toast({
@@ -87,8 +86,6 @@ const ListResult = () => {
         description: error.message,
         variant: "destructive"
       });
-      // Refresh the list in case of error to ensure UI is in sync
-      await fetchExamFiles();
     } finally {
       setIsDeletingFile(null);
     }
