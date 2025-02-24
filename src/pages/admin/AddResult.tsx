@@ -5,24 +5,55 @@ import { Card } from "@/components/ui/card";
 import AdminLayout from "@/components/AdminLayout";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface StudentResult {
-  candidateId: string;
-  examId: string;
-  examMark: number;
-  examRank: string;
+  candidate_id: string;
+  exam_id: string;
+  exam_mark: number;
+  exam_rank: string;
   percentage: number;
 }
 
 const AddResult = () => {
   const [isUploading, setIsUploading] = useState(false);
+  const [verificationChecked, setVerificationChecked] = useState(false);
+  const [parsedResults, setParsedResults] = useState<StudentResult[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const parseCSV = async (file: File): Promise<StudentResult[]> => {
+    const text = await file.text();
+    const lines = text.split('\n');
+    const headers = lines[0].split(',').map(header => header.trim());
+    
+    // Validate CSV structure
+    const requiredHeaders = ['Candidate ID', 'Exam ID', 'Exam Mark', 'Exam Rank', 'Percentage'];
+    const hasValidHeaders = requiredHeaders.every(header => 
+      headers.includes(header)
+    );
+
+    if (!hasValidHeaders) {
+      throw new Error('Invalid CSV format. Please ensure the CSV file has the correct headers: Candidate ID, Exam ID, Exam Mark, Exam Rank, Percentage');
+    }
+
+    return lines.slice(1)
+      .filter(line => line.trim())
+      .map(line => {
+        const [candidateId, examId, examMark, examRank, percentage] = line.split(',').map(value => value.trim());
+        return {
+          candidate_id: candidateId,
+          exam_id: examId,
+          exam_mark: Number(examMark),
+          exam_rank: examRank,
+          percentage: Number(percentage)
+        };
+      });
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    setIsUploading(true);
 
     try {
       // Validate file type
@@ -30,54 +61,46 @@ const AddResult = () => {
         throw new Error('Please upload a CSV file');
       }
 
-      // First, validate and parse the CSV
-      const text = await file.text();
-      const lines = text.split('\n');
-      const headers = lines[0].split(',').map(header => header.trim());
-      
-      // Validate CSV structure
-      const requiredHeaders = ['Candidate ID', 'Exam ID', 'Exam Mark', 'Exam Rank', 'Percentage'];
-      const hasValidHeaders = requiredHeaders.every(header => 
-        headers.includes(header)
-      );
+      const results = await parseCSV(file);
+      setParsedResults(results);
+      setSelectedFile(file);
+      setVerificationChecked(false); // Reset verification when new file is selected
+    } catch (error: any) {
+      toast({
+        title: "Error parsing file",
+        description: error.message,
+        variant: "destructive"
+      });
+      setParsedResults([]);
+      setSelectedFile(null);
+    }
+  };
 
-      if (!hasValidHeaders) {
-        throw new Error('Invalid CSV format. Please ensure the CSV file has the correct headers: Candidate ID, Exam ID, Exam Mark, Exam Rank, Percentage');
-      }
+  const handleUpload = async () => {
+    if (!selectedFile || !verificationChecked || isUploading) return;
 
-      // Upload file to Supabase Storage
-      const fileExt = file.name.split('.').pop();
+    setIsUploading(true);
+
+    try {
+      const fileExt = selectedFile.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${fileExt}`;
       
+      // Upload file to storage
       const { error: uploadError } = await supabase.storage
         .from('exam_results')
-        .upload(filePath, file);
+        .upload(filePath, selectedFile);
 
       if (uploadError) throw uploadError;
-
-      // Process CSV data
-      const results = lines.slice(1)
-        .filter(line => line.trim())
-        .map(line => {
-          const [candidateId, examId, examMark, examRank, percentage] = line.split(',').map(value => value.trim());
-          return {
-            candidate_id: candidateId,
-            exam_id: examId,
-            exam_mark: Number(examMark),
-            exam_rank: examRank,
-            percentage: Number(percentage)
-          };
-        });
 
       // Insert file metadata
       const { data: fileData, error: fileError } = await supabase
         .from('exam_result_files')
         .insert({
-          filename: file.name,
+          filename: selectedFile.name,
           file_path: filePath,
-          exam_id: results[0].exam_id,
+          exam_id: parsedResults[0].exam_id,
           exam_date: new Date().toISOString(),
-          total_results: results.length
+          total_results: parsedResults.length
         })
         .select()
         .single();
@@ -88,7 +111,7 @@ const AddResult = () => {
       const { error: resultsError } = await supabase
         .from('exam_results')
         .insert(
-          results.map(r => ({
+          parsedResults.map(r => ({
             ...r,
             file_id: fileData.id
           }))
@@ -98,11 +121,17 @@ const AddResult = () => {
 
       toast({
         title: "Success",
-        description: `Uploaded ${results.length} results successfully`,
+        description: `Uploaded ${parsedResults.length} results successfully`,
       });
 
-      // Reset file input
-      event.target.value = '';
+      // Reset form
+      setSelectedFile(null);
+      setParsedResults([]);
+      setVerificationChecked(false);
+      
+      if (event.target) {
+        event.target.value = '';
+      }
 
     } catch (error: any) {
       toast({
@@ -140,7 +169,7 @@ const AddResult = () => {
               <input
                 type="file"
                 accept=".csv"
-                onChange={handleFileUpload}
+                onChange={handleFileSelect}
                 className="hidden"
                 id="csv-upload"
                 disabled={isUploading}
@@ -153,13 +182,47 @@ const AddResult = () => {
               >
                 <Upload className="w-12 h-12 text-gray-400 mb-4" />
                 <span className="text-sm font-medium">
-                  {isUploading ? 'Uploading...' : 'Click to upload CSV file'}
+                  {selectedFile ? selectedFile.name : 'Click to upload CSV file'}
                 </span>
                 <span className="text-xs text-gray-500 mt-1">
                   CSV files only
                 </span>
               </label>
             </div>
+
+            {parsedResults.length > 0 && (
+              <div className="space-y-4">
+                <div className="bg-primary/5 p-4 rounded-lg">
+                  <p className="text-sm font-medium">File Summary:</p>
+                  <ul className="mt-2 text-sm">
+                    <li>Total Results: {parsedResults.length}</li>
+                    <li>Exam ID: {parsedResults[0].exam_id}</li>
+                  </ul>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="verification"
+                    checked={verificationChecked}
+                    onCheckedChange={(checked) => setVerificationChecked(checked === true)}
+                  />
+                  <label
+                    htmlFor="verification"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I have verified that the data in this file is correct and ready to be uploaded
+                  </label>
+                </div>
+
+                <Button
+                  onClick={handleUpload}
+                  disabled={!verificationChecked || isUploading}
+                  className="w-full"
+                >
+                  {isUploading ? "Uploading..." : "Upload Results"}
+                </Button>
+              </div>
+            )}
 
             <div className="flex items-start">
               <AlertCircle className="w-5 h-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />

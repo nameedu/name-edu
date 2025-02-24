@@ -58,7 +58,7 @@ const ListResult = () => {
     setIsDeletingFile(fileId);
 
     try {
-      // Delete results first (cascade will handle this in DB)
+      // First, delete the results
       const { error: resultsError } = await supabase
         .from('exam_results')
         .delete()
@@ -66,7 +66,7 @@ const ListResult = () => {
 
       if (resultsError) throw resultsError;
 
-      // Delete file metadata
+      // Then delete the file record
       const { error: fileError } = await supabase
         .from('exam_result_files')
         .delete()
@@ -74,19 +74,21 @@ const ListResult = () => {
 
       if (fileError) throw fileError;
 
+      // Remove the file from state only after successful deletion
+      setUploadedFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
+
       toast({
         title: "Success",
         description: "File and associated results deleted successfully",
       });
-
-      setUploadedFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
-
     } catch (error: any) {
       toast({
         title: "Error deleting file",
         description: error.message,
         variant: "destructive"
       });
+      // Refresh the list in case of error to ensure UI is in sync
+      await fetchExamFiles();
     } finally {
       setIsDeletingFile(null);
     }
