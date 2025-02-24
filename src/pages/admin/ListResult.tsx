@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { FileText, Calendar, Trash2, AlertCircle, Search, Plus } from "lucide-react";
+import { FileText, Calendar, Trash2, AlertCircle, Search, Plus, CheckCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AdminLayout from "@/components/AdminLayout";
@@ -23,6 +22,7 @@ const ListResult = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeletingFile, setIsDeletingFile] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const fetchExamFiles = async () => {
@@ -91,6 +91,61 @@ const ListResult = () => {
     }
   };
 
+  const handleDeleteSelectedFiles = async () => {
+    if (!confirm('Are you sure you want to delete the selected files? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsDeletingFile("multiple");
+
+    try {
+      // Delete all results associated with the selected files
+      const { error: resultsError } = await supabase
+        .from('exam_results')
+        .delete()
+        .in('file_id', Array.from(selectedFiles));
+
+      if (resultsError) throw resultsError;
+
+      // Then delete the selected file records
+      const { error: fileError } = await supabase
+        .from('exam_result_files')
+        .delete()
+        .in('id', Array.from(selectedFiles));
+
+      if (fileError) throw fileError;
+
+      // Update local state to remove the deleted files
+      setUploadedFiles(prevFiles => prevFiles.filter(file => !selectedFiles.has(file.id)));
+
+      toast({
+        title: "Success",
+        description: "Selected files and associated results deleted successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting files",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeletingFile(null);
+      setSelectedFiles(new Set());
+    }
+  };
+
+  const handleFileSelection = (fileId: string) => {
+    setSelectedFiles(prev => {
+      const updated = new Set(prev);
+      if (updated.has(fileId)) {
+        updated.delete(fileId);
+      } else {
+        updated.add(fileId);
+      }
+      return updated;
+    });
+  };
+
   const filteredFiles = uploadedFiles.filter(file =>
     file.exam_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     file.filename.toLowerCase().includes(searchTerm.toLowerCase())
@@ -104,7 +159,7 @@ const ListResult = () => {
             <h1 className="text-3xl font-bold">Results Management</h1>
             <p className="text-gray-600 mt-1">View and manage uploaded exam results</p>
           </div>
-          <Link to="/admin/results/add">
+          <Link to="/admin/add-result">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Add New Results
@@ -144,7 +199,7 @@ const ListResult = () => {
                 : "Upload your first results file to get started"}
             </p>
             {!searchTerm && (
-              <Link to="/admin/results/add">
+              <Link to="/admin/add-result">
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
                   Upload Results
@@ -154,6 +209,16 @@ const ListResult = () => {
           </Card>
         ) : (
           <div className="grid gap-4">
+            <div className="flex justify-end mb-4">
+              <Button
+                variant="destructive"
+                disabled={selectedFiles.size === 0}
+                onClick={handleDeleteSelectedFiles}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Selected
+              </Button>
+            </div>
             {filteredFiles.map((file) => (
               <Card key={file.id} className="p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between flex-wrap gap-4">
@@ -180,6 +245,12 @@ const ListResult = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedFiles.has(file.id)}
+                      onChange={() => handleFileSelection(file.id)}
+                      className="h-4 w-4 text-primary"
+                    />
                     <Button
                       variant="destructive"
                       size="sm"
