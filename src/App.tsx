@@ -36,49 +36,51 @@ import AddResult from "./pages/admin/AddResult";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/overview" element={<Overview />} />
-          <Route path="/faculty" element={<Faculty />} />
-          <Route path="/mission" element={<Mission />} />
-          <Route path="/infrastructure" element={<Infrastructure />} />
-          <Route path="/testimonials" element={<Testimonials />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/results" element={<Results />} />
-          <Route path="/online-form" element={<OnlineForm />} />
-          <Route path="/online-class" element={<OnlineClass />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/materials" element={<StudyMaterials />} />
-          <Route path="/videos" element={<VideoLectures />} />
-          <Route path="/questionbank" element={<QuestionBank />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/assignments" element={<Assignments />} />
-          <Route path="/syllabus" element={<Syllabus />} />
-          <Route path="/papers" element={<PreviousPapers />} />
-          <Route path="/portal" element={<StudentPortal />} />
-          <Route path="/schedule" element={<ExamSchedule />} />
-          <Route path="/payment" element={<FeePayment />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          
-          {/* Admin Routes - Protected by AdminGuard */}
-          <Route path="/admin" element={<AdminGuard><Dashboard /></AdminGuard>} />
-          <Route path="/admin/results/list" element={<AdminGuard><ListResult /></AdminGuard>} />
-          <Route path="/admin/results/add" element={<AdminGuard><AddResult /></AdminGuard>} />
-          <Route path="/admin/results" element={<Navigate to="/admin/results/list" replace />} />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/overview" element={<Overview />} />
+            <Route path="/faculty" element={<Faculty />} />
+            <Route path="/mission" element={<Mission />} />
+            <Route path="/infrastructure" element={<Infrastructure />} />
+            <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/results" element={<Results />} />
+            <Route path="/online-form" element={<OnlineForm />} />
+            <Route path="/online-class" element={<OnlineClass />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/materials" element={<StudyMaterials />} />
+            <Route path="/videos" element={<VideoLectures />} />
+            <Route path="/questionbank" element={<QuestionBank />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/assignments" element={<Assignments />} />
+            <Route path="/syllabus" element={<Syllabus />} />
+            <Route path="/papers" element={<PreviousPapers />} />
+            <Route path="/portal" element={<StudentPortal />} />
+            <Route path="/schedule" element={<ExamSchedule />} />
+            <Route path="/payment" element={<FeePayment />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            
+            {/* Admin Routes - Protected by AdminGuard */}
+            <Route path="/admin" element={<AdminGuard><Dashboard /></AdminGuard>} />
+            <Route path="/admin/results/list" element={<AdminGuard><ListResult /></AdminGuard>} />
+            <Route path="/admin/results/add" element={<AdminGuard><AddResult /></AdminGuard>} />
+            <Route path="/admin/results" element={<Navigate to="/admin/results/list" replace />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+};
 
 export default App;
