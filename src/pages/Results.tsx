@@ -414,13 +414,6 @@ const Results = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="mt-6 pt-6 border-t">
-                <Button variant="outline" className="w-full">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Download Result PDF
-                </Button>
-              </div>
             </Card>
           )}
 
