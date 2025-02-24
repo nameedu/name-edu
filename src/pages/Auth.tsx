@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, AlertCircle } from "lucide-react";
@@ -52,20 +53,12 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
-
-      // Try to sign in after sign up
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) throw signInError;
 
       toast({
         title: "Success",
@@ -73,45 +66,16 @@ const Auth = () => {
       });
 
       // Redirect based on role
-      if (signInData.user) {
-        await handleRoleBasedRedirect(signInData.user.id);
+      if (data.user) {
+        await handleRoleBasedRedirect(data.user.id);
       }
 
     } catch (error: any) {
-      // If user already exists, try to sign in directly
-      if (error.message.includes("already registered")) {
-        try {
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (signInError) throw signInError;
-
-          toast({
-            title: "Success",
-            description: "Logged in successfully",
-          });
-
-          // Redirect based on role
-          if (signInData.user) {
-            await handleRoleBasedRedirect(signInData.user.id);
-          }
-          return;
-        } catch (signInError: any) {
-          toast({
-            title: "Error",
-            description: signInError.message,
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
