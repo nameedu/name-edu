@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Upload, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,7 @@ const AddResult = () => {
     if (!selectedFile || !verificationChecked || isUploading) return;
 
     setIsUploading(true);
+    const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
 
     try {
       const fileExt = selectedFile.name.split('.').pop();
@@ -119,12 +121,12 @@ const AddResult = () => {
         description: `Uploaded ${parsedResults.length} results successfully`,
       });
 
+      // Reset the form
       setSelectedFile(null);
       setParsedResults([]);
       setVerificationChecked(false);
-      
-      if (event.target) {
-        event.target.value = '';
+      if (fileInput) {
+        fileInput.value = '';
       }
 
     } catch (error: any) {
