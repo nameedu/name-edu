@@ -56,30 +56,43 @@ const ListResult = () => {
     }
 
     setIsDeletingFile(fileId);
+    console.log('Starting deletion process for file:', fileId, 'path:', filePath);
 
     try {
-      // First delete the file from storage
+      // First delete all results associated with this file
+      console.log('Deleting exam results...');
+      const { error: resultsError } = await supabase
+        .from('exam_results')
+        .delete()
+        .match({ file_id: fileId });
+
+      if (resultsError) {
+        console.error('Error deleting results:', resultsError);
+        throw new Error(`Failed to delete results: ${resultsError.message}`);
+      }
+
+      // Then delete the file from storage
+      console.log('Deleting file from storage...');
       const { error: storageError } = await supabase.storage
         .from('exam_results')
         .remove([filePath]);
 
-      if (storageError) throw storageError;
-
-      // Then delete all results associated with this file
-      const { error: resultsError } = await supabase
-        .from('exam_results')
-        .delete()
-        .eq('file_id', fileId);
-
-      if (resultsError) throw resultsError;
+      if (storageError) {
+        console.error('Error deleting from storage:', storageError);
+        throw new Error(`Failed to delete file from storage: ${storageError.message}`);
+      }
 
       // Finally delete the file record
+      console.log('Deleting file record...');
       const { error: fileError } = await supabase
         .from('exam_result_files')
         .delete()
-        .eq('id', fileId);
+        .match({ id: fileId });
 
-      if (fileError) throw fileError;
+      if (fileError) {
+        console.error('Error deleting file record:', fileError);
+        throw new Error(`Failed to delete file record: ${fileError.message}`);
+      }
 
       // Update local state to remove the deleted file
       setUploadedFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
@@ -88,7 +101,10 @@ const ListResult = () => {
         title: "Success",
         description: "File and associated results deleted successfully",
       });
+      
+      console.log('Deletion process completed successfully');
     } catch (error: any) {
+      console.error('Deletion process failed:', error);
       toast({
         title: "Error deleting file",
         description: error.message,
