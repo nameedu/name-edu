@@ -18,14 +18,5 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-
-    base: '/', // Adjust this if your app is hosted under a subpath
-  build: {
-    outDir: 'dist', // Ensure the output directory is set to `dist`
-  },
-  server: {
-    historyApiFallback: true, // Ensures that all routes fallback to index.html
-  },
   },
 }));
-
