@@ -64,7 +64,8 @@ const ListResult = () => {
       const { error: resultsError } = await supabase
         .from('exam_results')
         .delete()
-        .match({ file_id: fileId });
+        .eq('file_id', fileId)
+        .throwOnError();
 
       if (resultsError) {
         console.error('Error deleting results:', resultsError);
@@ -75,7 +76,8 @@ const ListResult = () => {
       console.log('Deleting file from storage...');
       const { error: storageError } = await supabase.storage
         .from('exam_results')
-        .remove([filePath]);
+        .remove([filePath])
+        .throwOnError();
 
       if (storageError) {
         console.error('Error deleting from storage:', storageError);
@@ -87,7 +89,8 @@ const ListResult = () => {
       const { error: fileError } = await supabase
         .from('exam_result_files')
         .delete()
-        .match({ id: fileId });
+        .eq('id', fileId)
+        .throwOnError();
 
       if (fileError) {
         console.error('Error deleting file record:', fileError);
@@ -103,6 +106,9 @@ const ListResult = () => {
       });
       
       console.log('Deletion process completed successfully');
+
+      // Refresh the file list after successful deletion
+      await fetchExamFiles();
     } catch (error: any) {
       console.error('Deletion process failed:', error);
       toast({
