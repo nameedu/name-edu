@@ -76,8 +76,7 @@ const ListResult = () => {
       console.log('Deleting file from storage...');
       const { error: storageError } = await supabase.storage
         .from('exam_results')
-        .remove([filePath])
-        .throwOnError();
+        .remove([filePath]);
 
       if (storageError) {
         console.error('Error deleting from storage:', storageError);
