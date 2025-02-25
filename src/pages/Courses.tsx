@@ -63,7 +63,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/mbbs.jpg"
+    image: "/Images/mbbs.jpg"
   },
   {
     title: "BDS",
@@ -81,7 +81,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/bds.jpg"
+    image: "/Images/bds.jpg"
   },
   {
     title: "BSc Nursing",
@@ -99,7 +99,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/bsc-nursing.jpg"
+    image: "/Images/bsc-nursing.jpg"
   },
   {
     title: "BPH",
@@ -117,7 +117,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/bph.jpg"
+    image: "/Images/bph.jpg"
   },
   {
     title: "B Pharmacy",
@@ -135,7 +135,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/b-pharmacy.jpg"
+    image: "/Images/b-pharmacy.jpg"
   },
   {
     title: "B Optometry",
@@ -153,7 +153,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/b-optometry.jpg"
+    image: "/Images/b-optometry.jpg"
   },
   {
     title: "BPT",
@@ -171,7 +171,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/bpt.jpg"
+    image: "/Images/bpt.jpg"
   },
   {
     title: "BASLP",
@@ -189,7 +189,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/baslp.jpg"
+    image: "/Images/baslp.jpg"
   },
   {
     title: "BMIT",
@@ -207,7 +207,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/bmit.jpg"
+    image: "/Images/bmit.jpg"
   },
   {
     title: "BMLT",
@@ -225,7 +225,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/bmlt.jpg"
+    image: "/Images/bmlt.jpg"
   },
   {
     title: "B Tech",
@@ -243,7 +243,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/b-tech.jpg"
+    image: "/Images/b-tech.jpg"
   },
   {
     title: "B Forestry",
@@ -261,7 +261,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/b-forestry.jpg"
+    image: "/Images/b-forestry.jpg"
   },
   {
     title: "B Veterinary",
@@ -279,7 +279,7 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/b-veterinary.jpg"
+    image: "/Images/b-veterinary.jpg"
   },
   {
     title: "BSc Agriculture",
@@ -297,9 +297,8 @@ const courses = [
         </p>
       </div>
     ),
-    image: "/images/bsc-agriculture.jpg"
+    image: "/Images/bsc-agriculture.jpg"
   },
 ];
-
 
 export default Courses;
