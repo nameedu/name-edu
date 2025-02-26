@@ -1,8 +1,7 @@
-
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { GraduationCap, BookOpen, MessageSquare, Target, Timer, Users, Smartphone, Apple } from "lucide-react";
+import { GraduationCap, BookOpen, MessageSquare, Target, Timer, Users, Smartphone, Apple, Bell } from "lucide-react";
 
 const Index = () => {
   return (
@@ -67,50 +66,104 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Download App Section */}
-      <section className="py-20 bg-primary text-white">
+      {/* Study On The Go Section - Redesigned */}
+      <section className="py-20 bg-gradient-to-br from-primary/5 via-white to-primary/5">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">Study On The Go</h2>
-              <p className="text-lg mb-8 text-white/90">
-                Download our mobile app to access study materials, video lectures, and practice tests anytime, anywhere. Stay updated with your course progress and upcoming exams.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                
-                <Button
-    onClick={() => window.location.href = 'https://apps.apple.com/us/app/name-online/id1524191391'}
-    variant="outline"
-    className="bg-black text-white border-white hover:bg-white hover:text-black"
->
-    <Apple className="mr-2 h-5 w-5" />
-    Download for iOS
-</Button>
-
-                <Button
-  onClick={() => window.location.href = 'https://play.google.com/store/apps/details?id=com.avyaas.nameonline&hl=en_US'}
-  variant="outline"
-  className="bg-black text-white border-white hover:bg-white hover:text-black"
->
-  <Smartphone className="mr-2 h-5 w-5" />
-  Download for Android
-</Button>
-
+            <div className="space-y-6">
+              <div className="inline-flex items-center px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium">
+                <Smartphone className="w-4 h-4 mr-2" />
+                Mobile Learning
               </div>
-              <div className="mt-6 text-sm text-white/80">
-                Available on all devices. Free download for registered students.
+              <h2 className="text-3xl md:text-4xl font-bold">Study Anytime, Anywhere</h2>
+              <p className="text-lg text-neutral-600">
+                Access your study materials, take practice tests, and track your progress on the go. 
+                Our mobile app is designed to make your learning journey seamless and efficient.
+              </p>
+              <div className="space-y-4">
+                {appFeatures.map((feature, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="mt-1 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="w-3 h-3 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium mb-1">{feature.title}</h3>
+                      <p className="text-sm text-neutral-600">{feature.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-4 pt-4">
+                <Button
+                  onClick={() => window.location.href = 'https://apps.apple.com/us/app/name-online/id1524191391'}
+                  variant="outline"
+                  className="bg-black text-white border-white hover:bg-white hover:text-black"
+                >
+                  <Apple className="mr-2 h-5 w-5" />
+                  Download for iOS
+                </Button>
+                <Button
+                  onClick={() => window.location.href = 'https://play.google.com/store/apps/details?id=com.avyaas.nameonline&hl=en_US'}
+                  variant="outline"
+                  className="bg-black text-white border-white hover:bg-white hover:text-black"
+                >
+                  <Smartphone className="mr-2 h-5 w-5" />
+                  Download for Android
+                </Button>
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-[4/5] bg-white/10 rounded-xl backdrop-blur-sm">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <img 
-                    src="Images/name-app1.png" 
-                    alt="Mobile App Preview" 
-                    className="w-64"
-                  />
+              <div className="relative aspect-square max-w-md mx-auto">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl transform rotate-6"></div>
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-white shadow-xl">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <img 
+                      src="Images/name-app1.png" 
+                      alt="Mobile App Preview" 
+                      className="w-64 h-auto object-contain transform -rotate-6 hover:rotate-0 transition-transform duration-500"
+                    />
+                  </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Notice Board Section - New */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-8">Latest Updates</h2>
+            <div className="space-y-4">
+              {updates.map((update, index) => (
+                <Card key={index} className={`p-4 border-l-4 ${update.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'} animate-fade-in opacity-0`} style={{ '--delay': `${index * 200}ms` } as React.CSSProperties}>
+                  <div className="flex items-start gap-4">
+                    <div className={`p-2 rounded-full ${update.type === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'}`}>
+                      <Bell className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium">{update.title}</h3>
+                        {update.type === 'urgent' && (
+                          <span className="px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full">
+                            Urgent
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-neutral-600 text-sm">{update.description}</p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <span className="text-xs text-neutral-500">{update.date}</span>
+                        {update.link && (
+                          <a href={update.link} className="text-xs text-primary hover:underline">
+                            Learn more →
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
@@ -188,6 +241,66 @@ const features = [
     title: "Doubt Clearing Sessions",
     description: "Regular sessions to resolve your queries and difficulties.",
   },
+];
+
+const appFeatures = [
+  {
+    icon: BookOpen,
+    title: "Complete Study Materials",
+    description: "Access comprehensive notes, video lectures, and practice questions."
+  },
+  {
+    icon: Target,
+    title: "Practice Tests & Analytics",
+    description: "Take mock tests and get detailed performance analysis."
+  },
+  {
+    icon: Timer,
+    title: "Progress Tracking",
+    description: "Monitor your study progress and identify improvement areas."
+  },
+  {
+    icon: MessageSquare,
+    title: "Doubt Resolution",
+    description: "Get your queries resolved by expert faculty members."
+  }
+];
+
+const updates = [
+  {
+    type: 'urgent',
+    title: 'MBBS Entrance Mock Test Schedule',
+    description: 'The next mock test series for MBBS entrance preparation starts from March 25th. Register now to secure your spot.',
+    date: 'March 20, 2024',
+    link: '/mock-tests'
+  },
+  {
+    type: 'normal',
+    title: 'New Study Materials Available',
+    description: 'Updated Physics and Chemistry study materials have been uploaded to the student portal.',
+    date: 'March 19, 2024',
+    link: '/study-materials'
+  },
+  {
+    type: 'normal',
+    title: 'Counseling Session',
+    description: 'Special counseling session for medical aspirants scheduled for this weekend.',
+    date: 'March 18, 2024',
+    link: '/events'
+  },
+  {
+    type: 'urgent',
+    title: 'Scholarship Test Announcement',
+    description: 'Annual scholarship test for deserving students will be conducted on April 5th.',
+    date: 'March 17, 2024',
+    link: '/scholarship'
+  },
+  {
+    type: 'normal',
+    title: 'Faculty Addition',
+    description: 'Welcome Dr. Sarah Johnson, our new Biology faculty member with 15 years of teaching experience.',
+    date: 'March 16, 2024'
+  }
 ];
 
 const upcomingBatches = [
