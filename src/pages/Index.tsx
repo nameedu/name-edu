@@ -1,12 +1,29 @@
-
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GraduationCap, BookOpen, MessageSquare, Target, Timer, Users, Smartphone, Apple, Bell, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 const Index = () => {
+  const { data: notices, isLoading: isLoadingNotices } = useQuery({
+    queryKey: ['notices'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('notices')
+        .select('*')
+        .eq('is_active', true)
+        .order('published_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <Layout>
       {/* Hero Section with Medical Focus and Notice Board */}
@@ -38,7 +55,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Notice Board - Optimized for Mobile */}
+            {/* Notice Board - Dynamic Content */}
             <div className="lg:col-span-1">
               <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-2 h-[300px] sm:h-[400px]">
                 <div className="p-4 sm:p-6 h-full flex flex-col">
@@ -50,46 +67,54 @@ const Index = () => {
                     </Link>
                   </div>
                   <ScrollArea className="flex-1 pr-4">
-                    <div className="space-y-3">
-                      {updates.map((update, index) => (
-                        <div 
-                          key={index} 
-                          className={`relative border-l-4 pl-4 py-2 sm:py-3 ${
-                            update.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'
-                          } animate-fade-in opacity-0 hover:bg-neutral-50 rounded-r-lg transition-colors`}
-                          style={{ '--delay': `${(index + 4) * 200}ms` } as React.CSSProperties}
-                        >
-                          <div className="flex items-start gap-2">
-                            <div className={`p-1.5 rounded-full ${
-                              update.type === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'
-                            }`}>
-                              <Bell className="w-3 h-3" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="font-medium text-sm truncate">{update.title}</h3>
-                                {update.type === 'urgent' && (
-                                  <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full whitespace-nowrap">
-                                    Urgent
-                                  </span>
-                                )}
+                    {isLoadingNotices ? (
+                      <div className="flex items-center justify-center h-32">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {notices?.map((notice) => (
+                          <div 
+                            key={notice.id} 
+                            className={`relative border-l-4 pl-4 py-2 sm:py-3 ${
+                              notice.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'
+                            } animate-fade-in opacity-0 hover:bg-neutral-50 rounded-r-lg transition-colors`}
+                            style={{ '--delay': `${200}ms` } as React.CSSProperties}
+                          >
+                            <div className="flex items-start gap-2">
+                              <div className={`p-1.5 rounded-full ${
+                                notice.type === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'
+                              }`}>
+                                <Bell className="w-3 h-3" />
                               </div>
-                              <p className="text-neutral-600 text-xs line-clamp-2 mt-1">
-                                {update.description}
-                              </p>
-                              <div className="flex items-center gap-3 mt-2">
-                                <span className="text-xs text-neutral-500">{update.date}</span>
-                                {update.link && (
-                                  <Link to={update.link} className="text-xs text-primary hover:underline">
-                                    Learn more →
-                                  </Link>
-                                )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="font-medium text-sm truncate">{notice.title}</h3>
+                                  {notice.type === 'urgent' && (
+                                    <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full whitespace-nowrap">
+                                      Urgent
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-neutral-600 text-xs line-clamp-2 mt-1">
+                                  {notice.description}
+                                </p>
+                                <div className="flex items-center gap-3 mt-2">
+                                  <span className="text-xs text-neutral-500">
+                                    {format(new Date(notice.published_at), 'MMM d, yyyy')}
+                                  </span>
+                                  {notice.link && (
+                                    <Link to={notice.link} className="text-xs text-primary hover:underline">
+                                      Learn more →
+                                    </Link>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </ScrollArea>
                 </div>
               </Card>
@@ -289,43 +314,6 @@ const appFeatures = [
     icon: MessageSquare,
     title: "Doubt Resolution",
     description: "Get your queries resolved by expert faculty members."
-  }
-];
-
-const updates = [
-  {
-    type: 'urgent',
-    title: 'MBBS Entrance Mock Test Schedule',
-    description: 'The next mock test series for MBBS entrance preparation starts from March 25th. Register now to secure your spot.',
-    date: 'March 20, 2024',
-    link: '/mock-tests'
-  },
-  {
-    type: 'normal',
-    title: 'New Study Materials Available',
-    description: 'Updated Physics and Chemistry study materials have been uploaded to the student portal.',
-    date: 'March 19, 2024',
-    link: '/study-materials'
-  },
-  {
-    type: 'normal',
-    title: 'Counseling Session',
-    description: 'Special counseling session for medical aspirants scheduled for this weekend.',
-    date: 'March 18, 2024',
-    link: '/events'
-  },
-  {
-    type: 'urgent',
-    title: 'Scholarship Test Announcement',
-    description: 'Annual scholarship test for deserving students will be conducted on April 5th.',
-    date: 'March 17, 2024',
-    link: '/scholarship'
-  },
-  {
-    type: 'normal',
-    title: 'Faculty Addition',
-    description: 'Welcome Dr. Sarah Johnson, our new Biology faculty member with 15 years of teaching experience.',
-    date: 'March 16, 2024'
   }
 ];
 

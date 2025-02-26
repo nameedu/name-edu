@@ -8,7 +8,7 @@ import {
   FileText,
   Video,
   BookOpen,
-  Newspaper,
+  Bell,
   Calendar,
   Menu,
   LogOut,
@@ -87,9 +87,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       href: "/admin/videos",
     },
     {
-      title: "News",
-      icon: Newspaper,
-      href: "/admin/news",
+      title: "Notices",
+      icon: Bell,
+      href: "/admin/notices",
     },
     {
       title: "Exam Schedule",
