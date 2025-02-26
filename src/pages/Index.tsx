@@ -2,33 +2,93 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { GraduationCap, BookOpen, MessageSquare, Target, Timer, Users, Smartphone, Apple, Bell } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
     <Layout>
-      {/* Hero Section with Medical Focus */}
+      {/* Hero Section with Medical Focus and Notice Board */}
       <section className="pt-32 pb-20 px-4 bg-gradient-to-b from-primary/5 to-white">
-        <div className="container mx-auto text-center">
-          <span className="inline-block animate-fade-in opacity-0 [--delay:200ms] py-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-            #1 Medical Entrance Preparation Institute in Nepal
-          </span>
-          <h1 className="animate-fade-in opacity-0 [--delay:400ms] text-4xl md:text-6xl font-bold text-neutral-800 mb-6">
-            Your Path to Medical Success
-          </h1>
-          <p className="animate-fade-in opacity-0 [--delay:600ms] text-lg text-neutral-600 max-w-2xl mx-auto mb-8">
-            Comprehensive MBBS entrance exam preparation with expert guidance, proven study materials, and the highest success rate in Nepal.
-          </p>
-          <div className="animate-fade-in opacity-0 [--delay:800ms] flex flex-wrap justify-center gap-4">
-            <Button 
-            onClick={() => window.location.href = '/courses'}
-            className="bg-primary hover:bg-primary-hover text-white px-8 py-6">
-              Start Your Journey
-            </Button>
-            <Button 
-            onClick={() => window.location.href = '/contact'}
-            variant="outline" className="px-8 py-6">
-              Book Free Counseling
-            </Button>
+        <div className="container mx-auto">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Hero Content - Takes 2/3 width */}
+            <div className="lg:col-span-2 text-left">
+              <span className="inline-block animate-fade-in opacity-0 [--delay:200ms] py-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+                #1 Medical Entrance Preparation Institute in Nepal
+              </span>
+              <h1 className="animate-fade-in opacity-0 [--delay:400ms] text-4xl md:text-6xl font-bold text-neutral-800 mb-6">
+                Your Path to Medical Success
+              </h1>
+              <p className="animate-fade-in opacity-0 [--delay:600ms] text-lg text-neutral-600 max-w-2xl mb-8">
+                Comprehensive MBBS entrance exam preparation with expert guidance, proven study materials, and the highest success rate in Nepal.
+              </p>
+              <div className="animate-fade-in opacity-0 [--delay:800ms] flex flex-wrap gap-4">
+                <Button 
+                onClick={() => window.location.href = '/courses'}
+                className="bg-primary hover:bg-primary-hover text-white px-8 py-6">
+                  Start Your Journey
+                </Button>
+                <Button 
+                onClick={() => window.location.href = '/contact'}
+                variant="outline" className="px-8 py-6">
+                  Book Free Counseling
+                </Button>
+              </div>
+            </div>
+
+            {/* Notice Board - Takes 1/3 width */}
+            <div className="lg:col-span-1">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-2">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold text-neutral-800">Notice Board</h2>
+                    <Link to="/news" className="text-primary hover:text-primary-hover text-sm font-medium">
+                      View All →
+                    </Link>
+                  </div>
+                  <div className="space-y-4">
+                    {updates.slice(0, 5).map((update, index) => (
+                      <div 
+                        key={index} 
+                        className={`relative border-l-4 pl-4 py-3 ${
+                          update.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'
+                        } animate-fade-in opacity-0`}
+                        style={{ '--delay': `${(index + 4) * 200}ms` } as React.CSSProperties}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className={`p-1.5 rounded-full ${
+                            update.type === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'
+                          }`}>
+                            <Bell className="w-3 h-3" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-sm truncate">{update.title}</h3>
+                              {update.type === 'urgent' && (
+                                <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full whitespace-nowrap">
+                                  Urgent
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-neutral-600 text-xs line-clamp-2 mt-1">
+                              {update.description}
+                            </p>
+                            <div className="flex items-center gap-3 mt-2">
+                              <span className="text-xs text-neutral-500">{update.date}</span>
+                              {update.link && (
+                                <Link to={update.link} className="text-xs text-primary hover:underline">
+                                  Learn more →
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
@@ -125,45 +185,6 @@ const Index = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Notice Board Section - New */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-8">Latest Updates</h2>
-            <div className="space-y-4">
-              {updates.map((update, index) => (
-                <Card key={index} className={`p-4 border-l-4 ${update.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'} animate-fade-in opacity-0`} style={{ '--delay': `${index * 200}ms` } as React.CSSProperties}>
-                  <div className="flex items-start gap-4">
-                    <div className={`p-2 rounded-full ${update.type === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'}`}>
-                      <Bell className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium">{update.title}</h3>
-                        {update.type === 'urgent' && (
-                          <span className="px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full">
-                            Urgent
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-neutral-600 text-sm">{update.description}</p>
-                      <div className="flex items-center gap-4 mt-2">
-                        <span className="text-xs text-neutral-500">{update.date}</span>
-                        {update.link && (
-                          <a href={update.link} className="text-xs text-primary hover:underline">
-                            Learn more →
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
             </div>
           </div>
         </div>
