@@ -19,7 +19,7 @@ const Index = () => {
                 #1 Medical Entrance Preparation Institute in Nepal
               </span>
               <h1 className="animate-fade-in opacity-0 [--delay:400ms] text-4xl md:text-6xl font-bold text-neutral-800 mb-6 leading-tight">
-                Your Path to Medical Success
+                Your Path to <br/>Medical Success
               </h1>
               <p className="animate-fade-in opacity-0 [--delay:600ms] text-lg text-neutral-600 max-w-2xl mb-8">
                 Comprehensive MBBS entrance exam preparation with expert guidance, proven study materials, and the highest success rate in Nepal.
