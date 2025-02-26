@@ -1,16 +1,16 @@
-
 import { Link, useLocation } from "react-router-dom";
-import { GraduationCap, BookOpen, Award, MessageSquare, Building, Users, FileText, Video, Book, Newspaper, Download } from "lucide-react";
+import { GraduationCap, BookOpen, Award, MessageSquare, Building, Users, FileText, Video, Book, Newspaper, Download, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import Footer from "./Footer";
+import { useState } from "react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,6 +18,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -31,6 +32,7 @@ const Layout = ({ children }: LayoutProps) => {
                 className="h-8"
               />
             </Link>
+
             <div className="hidden md:flex items-center space-x-4">
               <NavigationMenu>
                 <NavigationMenuList>
@@ -162,7 +164,85 @@ const Layout = ({ children }: LayoutProps) => {
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
-            <Button className="bg-primary hover:bg-primary-hover text-white">
+
+            <div className="flex md:hidden items-center gap-4">
+              <Button className="bg-primary hover:bg-primary-hover text-white text-sm">
+                Student Login
+              </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                  <SheetHeader>
+                    <SheetTitle>Menu</SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-4 mt-6">
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-neutral-500">About Us</h3>
+                      {aboutUsLinks.map((item) => (
+                        <Link
+                          key={item.title}
+                          to={item.href}
+                          className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md group"
+                        >
+                          <item.icon className="h-5 w-5 text-primary" />
+                          <div>
+                            <div className="text-sm font-medium">{item.title}</div>
+                            <p className="text-xs text-neutral-600">{item.description}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-neutral-500">Student Zone</h3>
+                      {studentZoneLinks.map((item) => (
+                        <Link
+                          key={item.title}
+                          to={item.href}
+                          className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md group"
+                        >
+                          <item.icon className="h-5 w-5 text-primary" />
+                          <div>
+                            <div className="text-sm font-medium">{item.title}</div>
+                            <p className="text-xs text-neutral-600">{item.description}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium text-neutral-500">Quick Links</h3>
+                      <Link to="/courses" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
+                        <GraduationCap className="h-5 w-5 text-primary" />
+                        <span className="text-sm">Courses</span>
+                      </Link>
+                      <Link to="/results" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
+                        <Award className="h-5 w-5 text-primary" />
+                        <span className="text-sm">Results</span>
+                      </Link>
+                      <Link to="/online-form" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
+                        <FileText className="h-5 w-5 text-primary" />
+                        <span className="text-sm">Online Form</span>
+                      </Link>
+                      <Link to="/online-class" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
+                        <Video className="h-5 w-5 text-primary" />
+                        <span className="text-sm">Online Class</span>
+                      </Link>
+                      <Link to="/contact" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
+                        <MessageSquare className="h-5 w-5 text-primary" />
+                        <span className="text-sm">Contact</span>
+                      </Link>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+
+            <Button className="hidden md:flex bg-primary hover:bg-primary-hover text-white">
               Student Login
             </Button>
           </div>

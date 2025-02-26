@@ -18,32 +18,32 @@ const Index = () => {
               <span className="inline-block animate-fade-in opacity-0 [--delay:200ms] py-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
                 #1 Medical Entrance Preparation Institute in Nepal
               </span>
-              <h1 className="animate-fade-in opacity-0 [--delay:400ms] text-4xl md:text-6xl font-bold text-neutral-800 mb-6 leading-tight">
-                Your Path to <br/>Medical Success
+              <h1 className="animate-fade-in opacity-0 [--delay:400ms] text-3xl sm:text-4xl md:text-6xl font-bold text-neutral-800 mb-6 leading-tight">
+                Your Path to <br className="hidden sm:block"/>Medical Success
               </h1>
-              <p className="animate-fade-in opacity-0 [--delay:600ms] text-lg text-neutral-600 max-w-2xl mb-8">
+              <p className="animate-fade-in opacity-0 [--delay:600ms] text-base sm:text-lg text-neutral-600 max-w-2xl mb-8">
                 Comprehensive MBBS entrance exam preparation with expert guidance, proven study materials, and the highest success rate in Nepal.
               </p>
               <div className="animate-fade-in opacity-0 [--delay:800ms] flex flex-wrap gap-4">
                 <Button 
                 onClick={() => window.location.href = '/courses'}
-                className="bg-primary hover:bg-primary-hover text-white px-8 py-6 rounded-xl">
+                className="bg-primary hover:bg-primary-hover text-white px-6 sm:px-8 py-4 sm:py-6 rounded-xl w-full sm:w-auto text-center">
                   Start Your Journey
                 </Button>
                 <Button 
                 onClick={() => window.location.href = '/contact'}
-                variant="outline" className="px-8 py-6 rounded-xl">
+                variant="outline" className="px-6 sm:px-8 py-4 sm:py-6 rounded-xl w-full sm:w-auto text-center">
                   Book Free Counseling
                 </Button>
               </div>
             </div>
 
-            {/* Notice Board - Optimized */}
+            {/* Notice Board - Optimized for Mobile */}
             <div className="lg:col-span-1">
-              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-2 h-[400px]">
-                <div className="p-6 h-full flex flex-col">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-2 h-[300px] sm:h-[400px]">
+                <div className="p-4 sm:p-6 h-full flex flex-col">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-neutral-800">Notice Board</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-neutral-800">Notice Board</h2>
                     <Link to="/news" className="flex items-center gap-1 text-primary hover:text-primary-hover text-sm font-medium group">
                       View All 
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -54,7 +54,7 @@ const Index = () => {
                       {updates.map((update, index) => (
                         <div 
                           key={index} 
-                          className={`relative border-l-4 pl-4 py-3 ${
+                          className={`relative border-l-4 pl-4 py-2 sm:py-3 ${
                             update.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'
                           } animate-fade-in opacity-0 hover:bg-neutral-50 rounded-r-lg transition-colors`}
                           style={{ '--delay': `${(index + 4) * 200}ms` } as React.CSSProperties}
@@ -66,7 +66,7 @@ const Index = () => {
                               <Bell className="w-3 h-3" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <h3 className="font-medium text-sm truncate">{update.title}</h3>
                                 {update.type === 'urgent' && (
                                   <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full whitespace-nowrap">
@@ -98,54 +98,54 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Key Statistics - Optimized */}
-      <section className="py-16 bg-white">
+      {/* Key Statistics - Mobile Optimized */}
+      <section className="py-12 sm:py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center p-6 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
-                <div className="text-neutral-600">{stat.label}</div>
+              <div key={index} className="text-center p-4 sm:p-6 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">{stat.value}</div>
+                <div className="text-sm sm:text-base text-neutral-600">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section - Optimized */}
-      <section className="py-20 bg-neutral-50">
+      {/* Features Section - Mobile Optimized */}
+      <section className="py-16 sm:py-20 bg-neutral-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Why Choose Us?</h2>
-          <p className="text-lg text-neutral-600 text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4">Why Choose Us?</h2>
+          <p className="text-base sm:text-lg text-neutral-600 text-center max-w-2xl mx-auto mb-8 sm:mb-12">
             Experience the most comprehensive medical entrance preparation program in Nepal
           </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="p-6 bg-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <feature.icon className="h-12 w-12 text-primary mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-neutral-600">{feature.description}</p>
+              <Card key={index} className="p-4 sm:p-6 bg-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <feature.icon className="h-10 w-10 sm:h-12 sm:w-12 text-primary mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm sm:text-base text-neutral-600">{feature.description}</p>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Study On The Go Section - Optimized */}
-      <section className="py-20 bg-gradient-to-br from-primary/5 via-white to-primary/5">
+      {/* Study On The Go Section - Mobile Optimized */}
+      <section className="py-16 sm:py-20 bg-gradient-to-br from-primary/5 via-white to-primary/5">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div className="space-y-6">
               <div className="inline-flex items-center px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium">
                 <Smartphone className="w-4 h-4 mr-2" />
                 Mobile Learning
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold">Study Anytime, Anywhere</h2>
-              <p className="text-lg text-neutral-600">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">Study Anytime, Anywhere</h2>
+              <p className="text-base sm:text-lg text-neutral-600">
                 Access your study materials, take practice tests, and track your progress on the go. 
                 Our mobile app is designed to make your learning journey seamless and efficient.
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {appFeatures.map((feature, index) => (
                   <div key={index} className="flex items-start gap-3 p-4 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow">
                     <div className="mt-1 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -162,7 +162,7 @@ const Index = () => {
                 <Button
                   onClick={() => window.location.href = 'https://apps.apple.com/us/app/name-online/id1524191391'}
                   variant="outline"
-                  className="bg-black text-white border-white hover:bg-white hover:text-black rounded-xl"
+                  className="bg-black text-white border-white hover:bg-white hover:text-black rounded-xl w-full sm:w-auto"
                 >
                   <Apple className="mr-2 h-5 w-5" />
                   Download for iOS
@@ -170,14 +170,14 @@ const Index = () => {
                 <Button
                   onClick={() => window.location.href = 'https://play.google.com/store/apps/details?id=com.avyaas.nameonline&hl=en_US'}
                   variant="outline"
-                  className="bg-black text-white border-white hover:bg-white hover:text-black rounded-xl"
+                  className="bg-black text-white border-white hover:bg-white hover:text-black rounded-xl w-full sm:w-auto"
                 >
                   <Smartphone className="mr-2 h-5 w-5" />
                   Download for Android
                 </Button>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative order-first md:order-last">
               <div className="relative aspect-square max-w-md mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl transform rotate-6"></div>
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-white shadow-xl">
@@ -185,7 +185,7 @@ const Index = () => {
                     <img 
                       src="Images/name-app1.png" 
                       alt="Mobile App Preview" 
-                      className="w-64 h-auto object-contain transform -rotate-6 hover:rotate-0 transition-transform duration-500"
+                      className="w-48 sm:w-64 h-auto object-contain transform -rotate-6 hover:rotate-0 transition-transform duration-500"
                     />
                   </div>
                 </div>
