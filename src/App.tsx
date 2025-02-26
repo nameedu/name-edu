@@ -33,6 +33,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/admin/Dashboard";
 import ListResult from "./pages/admin/ListResult";
 import AddResult from "./pages/admin/AddResult";
+import Notices from "./pages/admin/Notices";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => {
             <Route path="/admin" element={<AdminGuard><Dashboard /></AdminGuard>} />
             <Route path="/admin/results" element={<AdminGuard><ListResult /></AdminGuard>} />
             <Route path="/admin/add-result" element={<AdminGuard><AddResult /></AdminGuard>} />
+            <Route path="/admin/notices" element={<AdminGuard><Notices /></AdminGuard>} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
