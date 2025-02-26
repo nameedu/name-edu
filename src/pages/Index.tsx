@@ -208,7 +208,7 @@ const Index = () => {
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-white shadow-xl">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <img 
-                      src="Images/name-app1.png" 
+                      src="Images/nameapp.png" 
                       alt="Mobile App Preview" 
                       className="w-48 sm:w-64 h-auto object-contain transform -rotate-6 hover:rotate-0 transition-transform duration-500"
                     />
