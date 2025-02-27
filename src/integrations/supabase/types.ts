@@ -83,6 +83,38 @@ export type Database = {
           },
         ]
       }
+      notice_attachments: {
+        Row: {
+          created_at: string | null
+          file_path: string
+          file_type: string
+          id: string
+          notice_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_path: string
+          file_type: string
+          id?: string
+          notice_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_path?: string
+          file_type?: string
+          id?: string
+          notice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notice_attachments_notice_id_fkey"
+            columns: ["notice_id"]
+            isOneToOne: false
+            referencedRelation: "notices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notices: {
         Row: {
           created_at: string | null

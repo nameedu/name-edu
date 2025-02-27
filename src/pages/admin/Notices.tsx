@@ -1,11 +1,22 @@
-
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Plus, Pencil, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  CheckCircle, 
+  XCircle,
+  Upload,
+  FileText,
+  Image as ImageIcon,
+  Eye
+} from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 import AdminGuard from "@/components/AdminGuard";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -38,17 +49,28 @@ interface Notice {
   id: string;
   title: string;
   description: string;
-  type: 'urgent' | 'normal';
-  link?: string;
-  published_at: string;
-  is_active: boolean;
+  type: "urgent" | "normal";
+  link?: string | null;
+  published_at: string | null;
+  created_at: string | null;
+  created_by: string | null;
+  is_active: boolean | null;
+}
+
+interface NoticeAttachment {
+  id: string;
+  notice_id: string;
+  file_path: string;
+  file_type: string;
+  created_at: string;
 }
 
 interface NoticeFormValues {
   title: string;
   description: string;
-  type: 'urgent' | 'normal';
+  type: "urgent" | "normal";
   link?: string;
+  files?: FileList;
 }
 
 const Notices = () => {
