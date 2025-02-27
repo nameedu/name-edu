@@ -1,10 +1,18 @@
 
-import { useState, useEffect } from "react";
-import { Search, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { Search, Trophy } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
 interface StudentResult {
@@ -17,58 +25,73 @@ interface StudentResult {
 
 const Results = () => {
   const [searchId, setSearchId] = useState("");
-  const [selectedExam, setSelectedExam] = useState("");
+  const [selectedExam, setSelectedExam] = useState<string>("");
   const [result, setResult] = useState<StudentResult | null>(null);
   const [isSearching, setIsSearching] = useState(false);
-  const [resultsData, setResultsData] = useState<StudentResult[]>([]);
-  const [examOptions, setExamOptions] = useState<string[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchExamOptions();
-  }, []);
+  // Fetch exam options
+  const { data: examOptions } = useQuery({
+    queryKey: ["examOptions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('exam_result_files')
+        .select('exam_id')
+        .order('exam_date', { ascending: false });
 
-  const fetchExamOptions = async () => {
-    const { data, error } = await supabase
-      .from('exam_result_files')
-      .select('exam_id')
-      .order('exam_date', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching exam options:', error);
-      return;
+      if (error) throw error;
+      return Array.from(new Set(data.map(d => d.exam_id)));
     }
+  });
 
-    const uniqueExamIds = Array.from(new Set(data.map(d => d.exam_id)));
-    setExamOptions(uniqueExamIds);
-  };
+  // Fetch top performers when an exam is selected
+  const { data: topPerformers } = useQuery({
+    queryKey: ["topPerformers", selectedExam],
+    enabled: !!selectedExam,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('exam_results')
+        .select('*')
+        .eq('exam_id', selectedExam)
+        .order('percentage', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedExam) {
+      toast({
+        title: "Error",
+        description: "Please select an exam first",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSearching(true);
     setResult(null);
 
     try {
-      const query = supabase
+      const { data, error } = await supabase
         .from('exam_results')
         .select('*')
-        .eq('candidate_id', searchId);
-
-      if (selectedExam) {
-        query.eq('exam_id', selectedExam);
-      }
-
-      const { data, error } = await query;
+        .eq('candidate_id', searchId)
+        .eq('exam_id', selectedExam)
+        .maybeSingle();
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
+      if (data) {
         const foundResult = {
-          candidateId: data[0].candidate_id,
-          examId: data[0].exam_id,
-          examMark: data[0].exam_mark,
-          examRank: data[0].exam_rank,
-          percentage: data[0].percentage
+          candidateId: data.candidate_id,
+          examId: data.exam_id,
+          examMark: data.exam_mark,
+          examRank: data.exam_rank,
+          percentage: data.percentage
         };
         setResult(foundResult);
       } else {
@@ -95,98 +118,144 @@ const Results = () => {
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Exam Results</h1>
           <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
-            Enter your Candidate ID to view your results
+            Select an exam and enter your Candidate ID to view your results
           </p>
 
-          <Card className="max-w-2xl mx-auto mb-12 p-6">
-            <form onSubmit={handleSearch} className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="candidateId" className="block text-sm font-medium mb-2">
-                    Candidate ID
-                  </label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <input
-                      id="candidateId"
-                      type="text"
-                      value={searchId}
-                      onChange={(e) => setSearchId(e.target.value)}
-                      className="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      placeholder="Enter your Candidate ID"
-                      required
-                    />
-                  </div>
-                </div>
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <Card className="p-6">
+                <form onSubmit={handleSearch} className="space-y-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="examId" className="block text-sm font-medium mb-2">
+                        Select Exam
+                      </label>
+                      <Select
+                        value={selectedExam}
+                        onValueChange={setSelectedExam}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an exam" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {examOptions?.map((examId) => (
+                            <SelectItem key={examId} value={examId}>
+                              {examId}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div>
-                  <label htmlFor="examId" className="block text-sm font-medium mb-2">
-                    Select Exam (Optional)
-                  </label>
-                  <select
-                    id="examId"
-                    value={selectedExam}
-                    onChange={(e) => setSelectedExam(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                  >
-                    <option value="">All Exams</option>
-                    {examOptions.map((examId) => (
-                      <option key={examId} value={examId}>
-                        {examId}
-                      </option>
+                    <div>
+                      <label htmlFor="candidateId" className="block text-sm font-medium mb-2">
+                        Candidate ID
+                      </label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <input
+                          id="candidateId"
+                          type="text"
+                          value={searchId}
+                          onChange={(e) => setSearchId(e.target.value)}
+                          className="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                          placeholder="Enter your Candidate ID"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={isSearching || !selectedExam}>
+                    {isSearching ? "Searching..." : "Search Results"}
+                  </Button>
+                </form>
+              </Card>
+
+              {result && (
+                <Card className="p-6 animate-fade-in">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-2xl font-bold mb-1">Result Details</h2>
+                      <p className="text-neutral-600">Candidate ID: {result.candidateId}</p>
+                      <p className="text-neutral-600">Exam ID: {result.examId}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-primary mb-1">Rank: {result.examRank}</div>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="font-semibold mb-4">Exam Score</h3>
+                      <div className="bg-primary/5 rounded-lg p-4 text-center">
+                        <div className="text-3xl font-bold text-primary mb-1">
+                          {result.examMark}
+                        </div>
+                        <div className="text-neutral-600">Marks</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold mb-4">Percentage</h3>
+                      <div className={`rounded-lg p-4 text-center ${
+                        result.percentage >= 50 ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
+                        <div className={`text-3xl font-bold mb-1 ${
+                          result.percentage >= 50 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {result.percentage}%
+                        </div>
+                        <div className="text-neutral-600">
+                          {result.percentage >= 50 ? 'Passed' : 'Failed'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            </div>
+
+            {selectedExam && (
+              <div>
+                <Card className="p-6">
+                  <div className="flex items-center gap-2 mb-6">
+                    <Trophy className="w-5 h-5 text-yellow-500" />
+                    <h2 className="text-xl font-bold">Top Performers</h2>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {topPerformers?.map((performer, index) => (
+                      <div
+                        key={performer.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-neutral-50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium
+                            ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                              index === 1 ? 'bg-neutral-200 text-neutral-700' :
+                              index === 2 ? 'bg-orange-100 text-orange-700' :
+                              'bg-neutral-100 text-neutral-600'
+                            }`}
+                          >
+                            {index + 1}
+                          </div>
+                          <div>
+                            <div className="font-medium">Candidate {performer.candidate_id}</div>
+                            <div className="text-sm text-neutral-500">Rank: {performer.exam_rank}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-primary">{performer.percentage}%</div>
+                          <div className="text-sm text-neutral-500">{performer.exam_mark} marks</div>
+                        </div>
+                      </div>
                     ))}
-                  </select>
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isSearching}>
-                {isSearching ? "Searching..." : "Search Results"}
-              </Button>
-            </form>
-          </Card>
-
-          {result && (
-            <Card className="max-w-2xl mx-auto p-6 animate-fade-in">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-1">Result Details</h2>
-                  <p className="text-neutral-600">Candidate ID: {result.candidateId}</p>
-                  <p className="text-neutral-600">Exam ID: {result.examId}</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold text-primary mb-1">Rank: {result.examRank}</div>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-4">Exam Score</h3>
-                  <div className="bg-primary/5 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-primary mb-1">
-                      {result.examMark}
-                    </div>
-                    <div className="text-neutral-600">Marks</div>
                   </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-4">Percentage</h3>
-                  <div className={`rounded-lg p-4 text-center ${
-                    result.percentage >= 50 ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    <div className={`text-3xl font-bold mb-1 ${
-                      result.percentage >= 50 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {result.percentage}%
-                    </div>
-                    <div className="text-neutral-600">
-                      {result.percentage >= 50 ? 'Passed' : 'Failed'}
-                    </div>
-                  </div>
-                </div>
+                </Card>
               </div>
-            </Card>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </Layout>
