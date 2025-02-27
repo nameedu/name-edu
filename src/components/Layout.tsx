@@ -175,70 +175,74 @@ const Layout = ({ children }: LayoutProps) => {
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                  <SheetHeader>
-                    <SheetTitle>Menu</SheetTitle>
-                  </SheetHeader>
-                  <div className="flex flex-col gap-4 mt-6">
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-neutral-500">About Us</h3>
-                      {aboutUsLinks.map((item) => (
-                        <Link
-                          key={item.title}
-                          to={item.href}
-                          className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md group"
-                        >
-                          <item.icon className="h-5 w-5 text-primary" />
-                          <div>
-                            <div className="text-sm font-medium">{item.title}</div>
-                            <p className="text-xs text-neutral-600">{item.description}</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                <SheetContent
+  side="right"
+  className="w-[320px] sm:w-[400px] max-h-[80vh] overflow-y-auto p-4"
+>
+  <SheetHeader>
+    <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
+  </SheetHeader>
+  
+  <div className="flex flex-col gap-6 mt-4">
+    {/* About Us Section */}
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-neutral-500">About Us</h3>
+      {aboutUsLinks.map((item) => (
+        <Link
+          key={item.title}
+          to={item.href}
+          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
+        >
+          <item.icon className="h-5 w-5 text-primary" />
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">{item.title}</span>
+            <p className="text-xs text-neutral-600">{item.description}</p>
+          </div>
+        </Link>
+      ))}
+    </div>
 
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-neutral-500">Student Zone</h3>
-                      {studentZoneLinks.map((item) => (
-                        <Link
-                          key={item.title}
-                          to={item.href}
-                          className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md group"
-                        >
-                          <item.icon className="h-5 w-5 text-primary" />
-                          <div>
-                            <div className="text-sm font-medium">{item.title}</div>
-                            <p className="text-xs text-neutral-600">{item.description}</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+    {/* Student Zone Section */}
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-neutral-500">Student Zone</h3>
+      {studentZoneLinks.map((item) => (
+        <Link
+          key={item.title}
+          to={item.href}
+          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
+        >
+          <item.icon className="h-5 w-5 text-primary" />
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">{item.title}</span>
+            <p className="text-xs text-neutral-600">{item.description}</p>
+          </div>
+        </Link>
+      ))}
+    </div>
 
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-neutral-500">Quick Links</h3>
-                      <Link to="/courses" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
-                        <GraduationCap className="h-5 w-5 text-primary" />
-                        <span className="text-sm">Courses</span>
-                      </Link>
-                      <Link to="/results" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
-                        <Award className="h-5 w-5 text-primary" />
-                        <span className="text-sm">Results</span>
-                      </Link>
-                      <Link to="/online-form" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
-                        <FileText className="h-5 w-5 text-primary" />
-                        <span className="text-sm">Online Form</span>
-                      </Link>
-                      <Link to="/online-class" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
-                        <Video className="h-5 w-5 text-primary" />
-                        <span className="text-sm">Online Class</span>
-                      </Link>
-                      <Link to="/contact" className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-md">
-                        <MessageSquare className="h-5 w-5 text-primary" />
-                        <span className="text-sm">Contact</span>
-                      </Link>
-                    </div>
-                  </div>
-                </SheetContent>
+    {/* Quick Links Section */}
+    <div className="space-y-2">
+      <h3 className="text-sm font-semibold text-neutral-500">Quick Links</h3>
+      {[
+        { to: "/courses", icon: GraduationCap, label: "Courses" },
+        { to: "/results", icon: Award, label: "Results" },
+        { to: "/online-form", icon: FileText, label: "Online Form" },
+        { to: "/online-class", icon: Video, label: "Online Class" },
+        { to: "/contact", icon: MessageSquare, label: "Contact" },
+      ].map(({ to, icon: Icon, label }) => (
+        <Link
+          key={label}
+          to={to}
+          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
+        >
+          <Icon className="h-5 w-5 text-primary" />
+          <span className="text-sm font-medium">{label}</span>
+        </Link>
+      ))}
+    </div>
+  </div>
+</SheetContent>
+
               </Sheet>
             </div>
 
