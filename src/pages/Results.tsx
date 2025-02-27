@@ -125,9 +125,9 @@ const Results = () => {
             <div className="space-y-6">
               <Card className="p-6">
                 <form onSubmit={handleSearch} className="space-y-6">
-                  <div className="space-y-4">
+                  <div className="space-y-4 ">
                     <div>
-                      <label htmlFor="examId" className="block text-sm font-medium mb-2">
+                      <label htmlFor="examId" className="block text-sm font-medium mb-2 ">
                         Select Exam
                       </label>
                       <Select
@@ -137,13 +137,13 @@ const Results = () => {
                         <SelectTrigger>
                           <SelectValue placeholder="Select an exam" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {examOptions?.map((examId) => (
-                            <SelectItem key={examId} value={examId}>
-                              {examId}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
+                        <SelectContent className="bg-white border border-gray-300 rounded-md shadow-lg z-50">
+  {examOptions?.map((examId) => (
+    <SelectItem key={examId} value={examId} className="hover:bg-gray-100 px-4 py-2">
+      {examId}
+    </SelectItem>
+  ))}
+</SelectContent>
                       </Select>
                     </div>
 
