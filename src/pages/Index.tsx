@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GraduationCap, BookOpen, MessageSquare, Target, Timer, Users, Smartphone, Apple, Bell, ChevronRight } from "lucide-react";
+import { GraduationCap, BookOpen, MessageSquare, Target, Timer, Users, Smartphone, Apple, Bell, ChevronRight, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,10 @@ const Index = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('notices')
-        .select('*')
+        .select(`
+          *,
+          attachments:notice_attachments(*)
+        `)
         .eq('is_active', true)
         .order('published_at', { ascending: false })
         .limit(5);
@@ -41,9 +44,10 @@ const Index = () => {
     return (
       <div className="space-y-3">
         {notices?.map((notice) => (
-          <div 
-            key={notice.id} 
-            className={`relative border-l-4 pl-4 py-2 sm:py-3 ${
+          <Link
+            key={notice.id}
+            to={`/news/${notice.id}`}
+            className={`relative block border-l-4 pl-4 py-2 sm:py-3 ${
               notice.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'
             } animate-fade-in opacity-0 hover:bg-neutral-50 rounded-r-lg transition-colors`}
             style={{ '--delay': `${200}ms` } as React.CSSProperties}
@@ -52,7 +56,7 @@ const Index = () => {
               <div className={`p-1.5 rounded-full ${
                 notice.type === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'
               }`}>
-                <Bell className="w-3 h-3" />
+                <AlertCircle className="w-3 h-3" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -70,15 +74,15 @@ const Index = () => {
                   <span className="text-xs text-neutral-500">
                     {format(new Date(notice.published_at), 'MMM d, yyyy')}
                   </span>
-                  {notice.link && (
-                    <Link to={notice.link} className="text-xs text-primary hover:underline">
-                      Learn more →
-                    </Link>
+                  {notice.attachments && notice.attachments.length > 0 && (
+                    <span className="text-xs text-primary">
+                      {notice.attachments.length} attachment{notice.attachments.length !== 1 ? 's' : ''}
+                    </span>
                   )}
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     );

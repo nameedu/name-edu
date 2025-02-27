@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,6 +33,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import ListResult from "./pages/admin/ListResult";
 import AddResult from "./pages/admin/AddResult";
 import Notices from "./pages/admin/Notices";
+import SingleNotice from "@/pages/SingleNotice";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +67,8 @@ const App = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            
+            <Route path="/news/:id" element={<SingleNotice />} />
             
             {/* Admin Routes - Protected by AdminGuard */}
             <Route path="/admin" element={<AdminGuard><Dashboard /></AdminGuard>} />

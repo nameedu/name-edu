@@ -1,8 +1,55 @@
-import { Newspaper, Calendar, AlertCircle, Bell } from "lucide-react";
+
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Link } from "react-router-dom";
+import { 
+  FileText, 
+  Image as ImageIcon, 
+  AlertCircle,
+  ExternalLink
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Layout from "@/components/Layout";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Notice {
+  id: string;
+  title: string;
+  description: string;
+  type: "urgent" | "normal";
+  link?: string | null;
+  published_at: string | null;
+  created_at: string | null;
+  is_active: boolean | null;
+  attachments?: NoticeAttachment[];
+}
+
+interface NoticeAttachment {
+  id: string;
+  notice_id: string;
+  file_path: string;
+  file_type: string;
+  created_at: string;
+}
 
 const News = () => {
+  const { data: notices, isLoading } = useQuery({
+    queryKey: ["notices"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notices")
+        .select(`
+          *,
+          attachments:notice_attachments(*)
+        `)
+        .eq("is_active", true)
+        .order("published_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Notice[];
+    },
+  });
+
   return (
     <Layout>
       <div className="pt-24 pb-16 px-4">
@@ -12,67 +59,97 @@ const News = () => {
             Stay informed with the latest announcements and updates
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {newsItems.map((item, index) => (
-              <Card key={index} className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="font-semibold">{item.title}</h3>
-                      {item.isImportant && (
-                        <span className="px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full">
-                          Important
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-neutral-600 mb-3">{item.content}</p>
-                    <div className="flex items-center text-sm text-neutral-500">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      <span>{item.date}</span>
-                    </div>
-                  </div>
+          {isLoading ? (
+            <div className="grid md:grid-cols-2 gap-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-48 bg-neutral-100 rounded-lg"></div>
                 </div>
-              </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8">
+              {notices?.map((notice) => (
+                <Card key={notice.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">
+                            <Link 
+                              to={`/news/${notice.id}`}
+                              className="hover:text-primary transition-colors"
+                            >
+                              {notice.title}
+                            </Link>
+                          </h3>
+                          {notice.type === "urgent" && (
+                            <span className="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded-full">
+                              Urgent
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-neutral-600 text-sm line-clamp-2 mb-4">
+                          {notice.description}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-neutral-500">
+                          <span>
+                            {format(new Date(notice.published_at!), "PPp")}
+                          </span>
+                          {notice.link && (
+                            <a
+                              href={notice.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline inline-flex items-center gap-1"
+                            >
+                              External Link
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {notice.attachments && notice.attachments.length > 0 && (
+                      <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                        <span className="text-xs text-neutral-500">
+                          Attachments:
+                        </span>
+                        {notice.attachments.map((attachment) => (
+                          <a
+                            key={attachment.id}
+                            href={supabase.storage
+                              .from("notice-attachments")
+                              .getPublicUrl(attachment.file_path).data.publicUrl
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 hover:bg-neutral-50 rounded inline-flex items-center gap-2"
+                            title={attachment.file_path.split("/").pop()}
+                          >
+                            {attachment.file_type.startsWith("image/") ? (
+                              <ImageIcon className="w-4 h-4 text-neutral-500" />
+                            ) : (
+                              <FileText className="w-4 h-4 text-neutral-500" />
+                            )}
+                            <span className="text-xs text-neutral-600">
+                              {attachment.file_path.split("/").pop()?.slice(0, 20)}
+                              {(attachment.file_path.split("/").pop()?.length || 0) > 20 ? "..." : ""}
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Layout>
   );
 };
-
-const newsItems = [
-  {
-    title: "Exam Schedule Update",
-    content: "The mock test series for JEE Advanced will begin from next week. Check the schedule for your batch.",
-    date: "March 15, 2024",
-    icon: Calendar,
-    isImportant: true,
-  },
-  {
-    title: "New Study Resources",
-    content: "New practice materials for Physics and Chemistry have been uploaded to the student portal.",
-    date: "March 14, 2024",
-    icon: Newspaper,
-    isImportant: false,
-  },
-  {
-    title: "Holiday Notice",
-    content: "The institute will remain closed on March 25th for Holi celebrations. Online classes will continue as scheduled.",
-    date: "March 13, 2024",
-    icon: Bell,
-    isImportant: true,
-  },
-  {
-    title: "Workshop Announcement",
-    content: "Special problem-solving workshop for Mathematics on Sunday. Registration is mandatory.",
-    date: "March 12, 2024",
-    icon: AlertCircle,
-    isImportant: false,
-  },
-];
 
 export default News;

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -141,7 +140,11 @@ const Notices = () => {
       
       const { data, error } = await supabase
         .from("notices")
-        .insert([noticeData])
+        .insert({
+          ...noticeData,
+          published_at: new Date().toISOString(),
+          is_active: true,
+        })
         .select()
         .single();
 
@@ -232,7 +235,6 @@ const Notices = () => {
 
   const deleteNoticeMutation = useMutation({
     mutationFn: async (ids: string[]) => {
-      // First, delete all attachments from storage
       const { data: attachments } = await supabase
         .from("notice_attachments")
         .select("file_path")
@@ -243,7 +245,6 @@ const Notices = () => {
         await supabase.storage.from("notice-attachments").remove(filePaths);
       }
 
-      // Then delete the notice (cascade will handle attachments in the database)
       const { error } = await supabase
         .from("notices")
         .delete()
