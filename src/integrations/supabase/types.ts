@@ -83,6 +83,42 @@ export type Database = {
           },
         ]
       }
+      notices: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string
+          id: string
+          is_active: boolean | null
+          link: string | null
+          published_at: string | null
+          title: string
+          type: Database["public"]["Enums"]["notice_type"]
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          id?: string
+          is_active?: boolean | null
+          link?: string | null
+          published_at?: string | null
+          title: string
+          type?: Database["public"]["Enums"]["notice_type"]
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_active?: boolean | null
+          link?: string | null
+          published_at?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notice_type"]
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -117,6 +153,7 @@ export type Database = {
       }
     }
     Enums: {
+      notice_type: "urgent" | "normal"
       user_role: "admin" | "student" | "teacher"
     }
     CompositeTypes: {
