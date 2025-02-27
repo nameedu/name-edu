@@ -1,3 +1,4 @@
+import React, { useMemo, useCallback } from 'react';
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 const Index = () => {
-  const { data: notices, isLoading: isLoadingNotices } = useQuery({
+  const { data: notices, isLoading: isLoadingNotices, error: noticesError } = useQuery({
     queryKey: ['notices'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -24,104 +25,127 @@ const Index = () => {
     },
   });
 
+  const renderNotices = useCallback(() => {
+    if (isLoadingNotices) {
+      return (
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      );
+    }
+
+    if (noticesError) {
+      return <div className="text-red-500">Failed to load notices.</div>;
+    }
+
+    return (
+      <div className="space-y-3">
+        {notices?.map((notice) => (
+          <div 
+            key={notice.id} 
+            className={`relative border-l-4 pl-4 py-2 sm:py-3 ${
+              notice.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'
+            } animate-fade-in opacity-0 hover:bg-neutral-50 rounded-r-lg transition-colors`}
+            style={{ '--delay': `${200}ms` } as React.CSSProperties}
+          >
+            <div className="flex items-start gap-2">
+              <div className={`p-1.5 rounded-full ${
+                notice.type === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'
+              }`}>
+                <Bell className="w-3 h-3" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-medium text-sm truncate">{notice.title}</h3>
+                  {notice.type === 'urgent' && (
+                    <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full whitespace-nowrap">
+                      Urgent
+                    </span>
+                  )}
+                </div>
+                <p className="text-neutral-600 text-xs line-clamp-2 mt-1">
+                  {notice.description}
+                </p>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-xs text-neutral-500">
+                    {format(new Date(notice.published_at), 'MMM d, yyyy')}
+                  </span>
+                  {notice.link && (
+                    <Link to={notice.link} className="text-xs text-primary hover:underline">
+                      Learn more →
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }, [isLoadingNotices, notices, noticesError]);
+
   return (
     <Layout>
       {/* Hero Section with Medical Focus and Notice Board */}
-      <section className="pt-32 pb-20 px-4 bg-gradient-to-b from-primary/5 to-white">
-        <div className="container mx-auto">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Hero Content */}
-            <div className="lg:col-span-2 text-left">
-              <span className="inline-block animate-fade-in opacity-0 [--delay:200ms] py-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-                #1 Medical Entrance Preparation Institute in Nepal
-              </span>
-              <h1 className="animate-fade-in opacity-0 [--delay:400ms] text-3xl sm:text-4xl md:text-6xl font-bold text-neutral-800 mb-6 leading-tight">
-                Your Path to <br className="hidden sm:block"/>Medical Success
-              </h1>
-              <p className="animate-fade-in opacity-0 [--delay:600ms] text-base sm:text-lg text-neutral-600 max-w-2xl mb-8">
-                Comprehensive MBBS entrance exam preparation with expert guidance, proven study materials, and the highest success rate in Nepal.
-              </p>
-              <div className="animate-fade-in opacity-0 [--delay:800ms] flex flex-wrap gap-4">
-                <Button 
-                onClick={() => window.location.href = '/courses'}
-                className="bg-primary hover:bg-primary-hover text-white px-6 sm:px-8 py-4 sm:py-6 rounded-xl w-full sm:w-auto text-center">
-                  Start Your Journey
-                </Button>
-                <Button 
-                onClick={() => window.location.href = '/contact'}
-                variant="outline" className="px-6 sm:px-8 py-4 sm:py-6 rounded-xl w-full sm:w-auto text-center">
-                  Book Free Counseling
-                </Button>
-              </div>
-            </div>
-
-            {/* Notice Board - Dynamic Content */}
-            <div className="lg:col-span-1">
-              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-2 h-[300px] sm:h-[400px]">
-                <div className="p-4 sm:p-6 h-full flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl sm:text-2xl font-bold text-neutral-800">Notice Board</h2>
-                    <Link to="/news" className="flex items-center gap-1 text-primary hover:text-primary-hover text-sm font-medium group">
-                      View All 
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-                  <ScrollArea className="flex-1 pr-4">
-                    {isLoadingNotices ? (
-                      <div className="flex items-center justify-center h-32">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {notices?.map((notice) => (
-                          <div 
-                            key={notice.id} 
-                            className={`relative border-l-4 pl-4 py-2 sm:py-3 ${
-                              notice.type === 'urgent' ? 'border-l-red-500' : 'border-l-primary'
-                            } animate-fade-in opacity-0 hover:bg-neutral-50 rounded-r-lg transition-colors`}
-                            style={{ '--delay': `${200}ms` } as React.CSSProperties}
-                          >
-                            <div className="flex items-start gap-2">
-                              <div className={`p-1.5 rounded-full ${
-                                notice.type === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'
-                              }`}>
-                                <Bell className="w-3 h-3" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <h3 className="font-medium text-sm truncate">{notice.title}</h3>
-                                  {notice.type === 'urgent' && (
-                                    <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full whitespace-nowrap">
-                                      Urgent
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-neutral-600 text-xs line-clamp-2 mt-1">
-                                  {notice.description}
-                                </p>
-                                <div className="flex items-center gap-3 mt-2">
-                                  <span className="text-xs text-neutral-500">
-                                    {format(new Date(notice.published_at), 'MMM d, yyyy')}
-                                  </span>
-                                  {notice.link && (
-                                    <Link to={notice.link} className="text-xs text-primary hover:underline">
-                                      Learn more →
-                                    </Link>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </ScrollArea>
-                </div>
-              </Card>
-            </div>
-          </div>
+      <section className="pt-20 pb-16 px-4 sm:pt-32 sm:pb-20 bg-gradient-to-b from-primary/5 to-white overflow-hidden">
+  <div className="container mx-auto max-w-screen-xl">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Hero Content */}
+      <div className="lg:col-span-2 text-left">
+        <span className="inline-block animate-fade-in opacity-0 [--delay:200ms] py-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+          #1 Medical Entrance Preparation Institute in Nepal
+        </span>
+        <h1 className="animate-fade-in opacity-0 [--delay:400ms] text-3xl sm:text-4xl md:text-6xl font-bold text-neutral-800 mb-6 leading-tight">
+          Your Path to <br className="hidden sm:block" />Medical Success
+        </h1>
+        <p className="animate-fade-in opacity-0 [--delay:600ms] text-base sm:text-lg text-neutral-600 max-w-2xl mb-8">
+          Comprehensive MBBS entrance exam preparation with expert guidance, proven study materials, and the highest success rate in Nepal.
+        </p>
+        <div className="animate-fade-in opacity-0 [--delay:800ms] flex flex-col sm:flex-row gap-4">
+          <Button 
+            onClick={() => window.location.href = '/courses'}
+            className="bg-primary hover:bg-primary-hover text-white px-6 sm:px-8 py-4 sm:py-6 rounded-xl w-full sm:w-auto max-w-sm text-center"
+          >
+            Start Your Journey
+          </Button>
+          <Button 
+            onClick={() => window.location.href = '/contact'}
+            variant="outline" 
+            className="px-6 sm:px-8 py-4 sm:py-6 rounded-xl w-full sm:w-auto max-w-sm text-center"
+          >
+            Book Free Counseling
+          </Button>
         </div>
-      </section>
+      </div>
+
+      {/* Notice Board - Dynamic Content */}
+      <div className="lg:col-span-1">
+  <Card className="bg-white/90 backdrop-blur-lg shadow-xl border border-neutral-200 rounded-2xl overflow-hidden">
+    {/* Notice Board Header - Lighter Background */}
+    <div className="bg-primary hover:bg-primary-hover text-white px-6 py-3 flex items-center justify-between">
+      <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+        <Bell className="w-5 h-5 opacity-90" /> Notice Board
+      </h2>
+      <Link 
+        to="/news" 
+        className="flex items-center gap-1 text-white/90 hover:text-white text-sm font-medium group"
+      >
+        View All
+        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      </Link>
+    </div>
+
+    {/* Notice List */}
+    <ScrollArea className="px-5 py-4 h-[280px] sm:h-[380px] overflow-y-auto">
+      {renderNotices && renderNotices()}
+    </ScrollArea>
+  </Card>
+</div>
+
+    </div>
+  </div>
+</section>
+
 
       {/* Key Statistics - Mobile Optimized */}
       <section className="py-12 sm:py-16 bg-white">
