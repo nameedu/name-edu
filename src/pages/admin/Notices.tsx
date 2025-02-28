@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -44,7 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -166,10 +165,10 @@ const Notices = () => {
         description: "Notice created successfully",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create notice",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -200,10 +199,10 @@ const Notices = () => {
         description: "Notice updated successfully",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to update notice",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -225,10 +224,10 @@ const Notices = () => {
         description: "Notice status updated successfully",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to update notice status",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -236,7 +235,6 @@ const Notices = () => {
 
   const deleteNoticeMutation = useMutation({
     mutationFn: async (ids: string[]) => {
-      // First, delete all attachments from storage
       const { data: attachments } = await supabase
         .from("notice_attachments")
         .select("file_path")
@@ -247,7 +245,6 @@ const Notices = () => {
         await supabase.storage.from("notice-attachments").remove(filePaths);
       }
 
-      // Then delete the notice (cascade will handle attachments in the database)
       const { error } = await supabase
         .from("notices")
         .delete()
@@ -263,10 +260,10 @@ const Notices = () => {
         description: "Notices deleted successfully",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to delete notices",
+        description: error.message,
         variant: "destructive",
       });
     },

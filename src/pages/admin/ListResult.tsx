@@ -1,283 +1,231 @@
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { Download, Trash2, Plus, File, RefreshCw } from "lucide-react";
-import AdminLayout from "@/components/AdminLayout";
-import AdminGuard from "@/components/AdminGuard";
+import { useState, useEffect } from "react";
+import { FileText, Calendar, Trash2, Search, Plus } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+import AdminLayout from "@/components/AdminLayout";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { Link } from "react-router-dom";
 
-interface ExamResultFile {
+interface ExamFile {
   id: string;
+  filename: string;
   exam_id: string;
-  file_path: string;
   exam_date: string;
-  created_at: string;
+  uploaded_at: string;
+  total_results: number;
+  file_path: string;
 }
 
 const ListResult = () => {
+  const [uploadedFiles, setUploadedFiles] = useState<ExamFile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeletingFile, setIsDeletingFile] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: results, isLoading } = useQuery({
-    queryKey: ["resultFiles"],
-    queryFn: async () => {
+  const fetchExamFiles = async () => {
+    try {
       const { data, error } = await supabase
-        .from("exam_result_files")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .from('exam_result_files')
+        .select('*')
+        .order('uploaded_at', { ascending: false });
 
       if (error) throw error;
-      return data as ExamResultFile[];
-    },
-  });
+      setUploadedFiles(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error fetching files",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const deleteResultMutation = useMutation({
-    mutationFn: async (id: string) => {
-      // First get the file path
-      const { data: fileData, error: fetchError } = await supabase
-        .from("exam_result_files")
-        .select("file_path")
-        .eq("id", id)
-        .single();
+  useEffect(() => {
+    fetchExamFiles();
+  }, []);
 
-      if (fetchError) throw fetchError;
+  const handleDeleteFile = async (fileId: string, filePath: string) => {
+    if (!confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+      return;
+    }
 
-      // Delete from storage
-      if (fileData?.file_path) {
-        const { error: storageError } = await supabase.storage
-          .from("exam-results")
-          .remove([fileData.file_path]);
+    setIsDeletingFile(fileId);
+    console.log('Starting deletion process for file:', fileId, 'path:', filePath);
 
-        if (storageError) throw storageError;
+    try {
+      // First delete all results associated with this file
+      console.log('Deleting exam results...');
+      const { error: resultsError } = await supabase
+        .from('exam_results')
+        .delete()
+        .eq('file_id', fileId)
+        .throwOnError();
+
+      if (resultsError) {
+        console.error('Error deleting results:', resultsError);
+        throw new Error(`Failed to delete results: ${resultsError.message}`);
       }
 
-      // Delete record
-      const { error: deleteError } = await supabase
-        .from("exam_result_files")
+      // Then delete the file from storage
+      console.log('Deleting file from storage...');
+      const { error: storageError } = await supabase.storage
+        .from('exam_results')
+        .remove([filePath]);
+
+      if (storageError) {
+        console.error('Error deleting from storage:', storageError);
+        throw new Error(`Failed to delete file from storage: ${storageError.message}`);
+      }
+
+      // Finally delete the file record
+      console.log('Deleting file record...');
+      const { error: fileError } = await supabase
+        .from('exam_result_files')
         .delete()
-        .eq("id", id);
+        .eq('id', fileId)
+        .throwOnError();
 
-      if (deleteError) throw deleteError;
+      if (fileError) {
+        console.error('Error deleting file record:', fileError);
+        throw new Error(`Failed to delete file record: ${fileError.message}`);
+      }
 
-      return id;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resultFiles"] });
+      // Update local state to remove the deleted file
+      setUploadedFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
+
       toast({
         title: "Success",
-        description: "Result file deleted successfully",
+        description: "File and associated results deleted successfully",
       });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete result file",
-        variant: "destructive",
-      });
-    },
-  });
+      
+      console.log('Deletion process completed successfully');
 
-  const refreshResultsMutation = useMutation({
-    mutationFn: async (examId: string) => {
-      const { error } = await supabase.functions.invoke("process-results", {
-        body: { examId },
-      });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resultFiles"] });
+      // Refresh the file list after successful deletion
+      await fetchExamFiles();
+    } catch (error: any) {
+      console.error('Deletion process failed:', error);
       toast({
-        title: "Success",
-        description: "Results processed successfully",
+        title: "Error deleting file",
+        description: error.message,
+        variant: "destructive"
       });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to process results",
-        variant: "destructive",
-      });
-    },
-  });
+    } finally {
+      setIsDeletingFile(null);
+    }
+  };
 
-  const filteredResults = results?.filter((result) =>
-    result.exam_id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFiles = uploadedFiles.filter(file =>
+    file.exam_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    file.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <AdminGuard>
-      <AdminLayout>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Manage Results</h1>
-            <Button asChild>
-              <Link to="/admin/results/add" className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add New Result
-              </Link>
+    <AdminLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Results Management</h1>
+            <p className="text-gray-600 mt-1">View and manage uploaded exam results</p>
+          </div>
+          <Link to="/admin/add-result">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Results
             </Button>
-          </div>
-
-          <div className="mb-6 w-full md:w-1/3">
-            <Input
-              type="search"
-              placeholder="Search by exam ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[200px]">Exam ID</TableHead>
-                    <TableHead>Exam Date</TableHead>
-                    <TableHead>File</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredResults?.length ? (
-                    filteredResults.map((result) => (
-                      <TableRow key={result.id}>
-                        <TableCell className="font-medium">
-                          {result.exam_id}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(result.exam_date).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <File className="h-4 w-4 text-neutral-500" />
-                            <span className="text-sm truncate max-w-[200px]">
-                              {result.file_path.split("/").pop()}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              asChild
-                            >
-                              <a
-                                href={
-                                  supabase.storage
-                                    .from("exam-results")
-                                    .getPublicUrl(result.file_path).data
-                                    .publicUrl
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1"
-                              >
-                                <Download className="h-4 w-4" />
-                                <span className="hidden sm:inline">
-                                  Download
-                                </span>
-                              </a>
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                refreshResultsMutation.mutate(result.exam_id)
-                              }
-                              className="flex items-center gap-1"
-                            >
-                              <RefreshCw className="h-4 w-4" />
-                              <span className="hidden sm:inline">Process</span>
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-500 flex items-center gap-1"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  <span className="hidden sm:inline">
-                                    Delete
-                                  </span>
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Are you sure?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This will permanently delete the result file
-                                    and all associated student results. This
-                                    action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() =>
-                                      deleteResultMutation.mutate(result.id)
-                                    }
-                                    className="bg-red-500 hover:bg-red-600"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={4}
-                        className="h-24 text-center"
-                      >
-                        No results found.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          </Link>
         </div>
-      </AdminLayout>
-    </AdminGuard>
+
+        <Card className="mb-6">
+          <div className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="text"
+                placeholder="Search by exam ID or filename..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading results...</p>
+          </div>
+        ) : filteredFiles.length === 0 ? (
+          <Card className="p-8 text-center">
+            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">
+              {searchTerm ? "No matching results found" : "No Results Uploaded"}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {searchTerm 
+                ? "Try adjusting your search terms"
+                : "Upload your first results file to get started"}
+            </p>
+            {!searchTerm && (
+              <Link to="/admin/add-result">
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Upload Results
+                </Button>
+              </Link>
+            )}
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {filteredFiles.map((file) => (
+              <Card key={file.id} className="p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-primary" />
+                      <span className="font-medium">{file.filename}</span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {format(new Date(file.uploaded_at), 'PPp')}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+                          Exam ID: {file.exam_id}
+                        </span>
+                        <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                          {file.total_results} Results
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteFile(file.id, file.file_path)}
+                      disabled={isDeletingFile === file.id}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {isDeletingFile === file.id ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </AdminLayout>
   );
 };
 
