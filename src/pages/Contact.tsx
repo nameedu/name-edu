@@ -41,11 +41,13 @@ const Contact = () => {
 
     try {
       // Call the edge function to send email
-      const { error } = await supabase.functions.invoke('send-contact-email', {
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
         body: formData
       });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast({
         title: "Message sent!",
