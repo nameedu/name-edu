@@ -33,6 +33,23 @@ import { useToast } from "@/components/ui/use-toast";
 import AdminLayout from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 
+interface ExamResult {
+  id: string;
+  candidate_id: string;
+  exam_id: string;
+  exam_mark: number;
+  exam_rank: string;
+  percentage: number;
+  file_id?: string;
+  created_at?: string;
+  // Custom columns for display purposes
+  student_name?: string;
+  roll_number?: string;
+  exam_name?: string;
+  grade?: string;
+  score?: number;
+}
+
 const ListResult = () => {
   const [selectedExam, setSelectedExam] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,16 +64,16 @@ const ListResult = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["results", selectedExam, searchTerm],
+    queryKey: ["examResults", selectedExam, searchTerm],
     queryFn: async () => {
-      let query = supabase.from("results").select("*");
+      let query = supabase.from("exam_results").select("*");
       
       if (selectedExam) {
-        query = query.eq("exam_name", selectedExam);
+        query = query.eq("exam_id", selectedExam);
       }
       
       if (searchTerm) {
-        query = query.ilike("student_name", `%${searchTerm}%`);
+        query = query.ilike("candidate_id", `%${searchTerm}%`);
       }
       
       const { data, error } = await query.order("created_at", { ascending: false });
@@ -65,7 +82,17 @@ const ListResult = () => {
         throw new Error(error.message || "Failed to fetch results");
       }
       
-      return data;
+      // Transform the data for display purposes
+      const formattedResults: ExamResult[] = data.map(result => ({
+        ...result,
+        student_name: result.candidate_id, // Using candidate_id as student name
+        roll_number: result.candidate_id, // Using candidate_id as roll number too
+        exam_name: result.exam_id, // Using exam_id as exam name
+        score: result.exam_mark, // Using exam_mark as score
+        grade: result.exam_rank // Using exam_rank as grade
+      }));
+      
+      return formattedResults;
     },
     enabled: true,
   });
@@ -74,15 +101,15 @@ const ListResult = () => {
     queryKey: ["examTypes"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("results")
-        .select("exam_name")
-        .order("exam_name");
+        .from("exam_results")
+        .select("exam_id")
+        .order("exam_id");
       
       if (error) {
         throw new Error(error.message || "Failed to fetch exam types");
       }
       
-      return Array.from(new Set(data.map(item => item.exam_name)));
+      return Array.from(new Set(data.map(item => item.exam_id)));
     },
   });
 
@@ -93,7 +120,7 @@ const ListResult = () => {
     
     try {
       const { error } = await supabase
-        .from("results")
+        .from("exam_results")
         .delete()
         .eq("id", deleteId);
       
