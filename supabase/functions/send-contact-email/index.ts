@@ -31,39 +31,40 @@ serve(async (req) => {
       );
     }
 
-    // Create SMTP client with environment variables
-    const client = new SMTPClient({
-      connection: {
-        hostname: Deno.env.get("SMTP_HOST") || "",
-        port: Number(Deno.env.get("SMTP_PORT")) || 587,
-        tls: true,
-        auth: {
-          username: Deno.env.get("SMTP_USERNAME") || "",
-          password: Deno.env.get("SMTP_PASSWORD") || "",
-        },
-      },
+    console.log("Preparing to send email with inputs:", { name, email, subject });
+    console.log("SMTP Environment Variables present:", {
+      host: !!Deno.env.get("SMTP_HOST"),
+      port: !!Deno.env.get("SMTP_PORT"),
+      username: !!Deno.env.get("SMTP_USERNAME"),
+      password: !!Deno.env.get("SMTP_PASSWORD"),
+      from: !!Deno.env.get("SMTP_FROM"),
     });
 
-    // Log configuration for debugging (excluding password)
-    console.log("SMTP Configuration:", {
-      host: Deno.env.get("SMTP_HOST"),
-      port: Deno.env.get("SMTP_PORT"),
-      username: Deno.env.get("SMTP_USERNAME"),
-      from: Deno.env.get("SMTP_FROM"),
-    });
-
-    // Prepare email content
-    const emailContent = `
-      <h2>New Contact Form Submission</h2>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Subject:</strong> ${subject}</p>
-      <p><strong>Message:</strong></p>
-      <p>${message.replace(/\n/g, '<br>')}</p>
-    `;
-
-    // Send the email
     try {
+      // Create SMTP client with environment variables
+      const client = new SMTPClient({
+        connection: {
+          hostname: Deno.env.get("SMTP_HOST") || "",
+          port: Number(Deno.env.get("SMTP_PORT")) || 587,
+          tls: true,
+          auth: {
+            username: Deno.env.get("SMTP_USERNAME") || "",
+            password: Deno.env.get("SMTP_PASSWORD") || "",
+          },
+        },
+      });
+
+      // Prepare email content
+      const emailContent = `
+        <h2>New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `;
+
+      // Send the email
       await client.send({
         from: Deno.env.get("SMTP_FROM") || "contact@name.edu.np",
         to: "info@name.edu.np",
@@ -87,9 +88,18 @@ serve(async (req) => {
         }
       );
     } catch (emailError) {
-      console.error("Error sending email:", emailError);
-      await client.close();
-      throw emailError;
+      console.error("Error in SMTP client:", emailError);
+      
+      return new Response(
+        JSON.stringify({ error: "Email server error: " + (emailError.message || "Unknown error") }),
+        { 
+          status: 500, 
+          headers: { 
+            "Content-Type": "application/json",
+            ...corsHeaders
+          } 
+        }
+      );
     }
   } catch (error) {
     console.error("Error in send-contact-email function:", error);
