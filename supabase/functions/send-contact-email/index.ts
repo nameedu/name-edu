@@ -1,9 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@1.0.0";
-
-// Initialize Resend with API key from environment variables
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -35,12 +32,24 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields");
     }
 
-    // Send email using Resend
-    const emailResponse = await resend.emails.send({
-      from: "Contact Form <onboarding@resend.dev>",
-      to: ["info@name.edu.np"],
-      bcc: ["admin@name.edu.np"],
-      reply_to: email,
+    // Create SMTP client with environment variables
+    const client = new SMTPClient({
+      connection: {
+        hostname: Deno.env.get("SMTP_HOST") || "",
+        port: Number(Deno.env.get("SMTP_PORT")) || 587,
+        tls: true,
+        auth: {
+          username: Deno.env.get("SMTP_USERNAME") || "",
+          password: Deno.env.get("SMTP_PASSWORD") || "",
+        },
+      },
+    });
+
+    // Send email
+    await client.send({
+      from: Deno.env.get("SMTP_FROM") || "contact@name.edu.np",
+      to: "info@name.edu.np",
+      bcc: "admin@name.edu.np",
       subject: `Contact Form: ${subject}`,
       html: `
         <h2>New Contact Form Submission</h2>
@@ -49,9 +58,13 @@ const handler = async (req: Request): Promise<Response> => {
         <h3>Message:</h3>
         <p>${message.replace(/\n/g, "<br>")}</p>
       `,
+      replyTo: email,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    // Close the connection
+    await client.close();
+
+    console.log("Email sent successfully via Nodemailer");
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
