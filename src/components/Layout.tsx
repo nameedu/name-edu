@@ -27,7 +27,7 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center">
               <img
-                src="/lovable-uploads/2717d708-aa29-4f6e-adae-571558619133.png"
+                src="/Images/logo.png"
                 alt="NAME Edu"
                 className="h-8"
               />

@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2 lg:col-span-1">
             <div className="mb-6">
               <img
-                src="/lovable-uploads/2717d708-aa29-4f6e-adae-571558619133.png"
+                src="/Images/logo.png"
                 alt="NAME Edu"
                 className="h-12 mb-4"
               />

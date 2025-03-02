@@ -120,7 +120,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           <div className="flex items-center justify-between p-4 border-b">
             <Link to="/admin" className="flex items-center">
               <img
-                src="/lovable-uploads/2717d708-aa29-4f6e-adae-571558619133.png"
+                src="/Images/logo.png"
                 alt="NAME Edu"
                 className="h-8"
               />
