@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,11 +34,6 @@ import ListResult from "./pages/admin/ListResult";
 import AddResult from "./pages/admin/AddResult";
 import Notices from "./pages/admin/Notices";
 import SingleNotice from "@/pages/SingleNotice";
-import AdminCourses from "./pages/admin/AdminCourses";
-import MaterialsIndex from "./pages/admin/materials/index";
-import MaterialsAdd from "./pages/admin/materials/add";
-import PapersIndex from "./pages/admin/papers/index";
-import PapersAdd from "./pages/admin/papers/add";
 
 const queryClient = new QueryClient();
 
@@ -49,7 +43,6 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Routes>
-            {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/overview" element={<Overview />} />
             <Route path="/faculty" element={<Faculty />} />
@@ -74,23 +67,15 @@ const App = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            
             <Route path="/news/:id" element={<SingleNotice />} />
             
-            {/* Admin Routes - All Protected by AdminGuard */}
+            {/* Admin Routes - Protected by AdminGuard */}
             <Route path="/admin" element={<AdminGuard><Dashboard /></AdminGuard>} />
             <Route path="/admin/results" element={<AdminGuard><ListResult /></AdminGuard>} />
             <Route path="/admin/add-result" element={<AdminGuard><AddResult /></AdminGuard>} />
             <Route path="/admin/notices" element={<AdminGuard><Notices /></AdminGuard>} />
-            <Route path="/admin/courses" element={<AdminGuard><AdminCourses /></AdminGuard>} />
             
-            {/* Student Zone Admin Routes */}
-            <Route path="/admin/materials" element={<AdminGuard><MaterialsIndex /></AdminGuard>} />
-            <Route path="/admin/materials/add" element={<AdminGuard><MaterialsAdd /></AdminGuard>} />
-            <Route path="/admin/papers" element={<AdminGuard><PapersIndex /></AdminGuard>} />
-            <Route path="/admin/papers/add" element={<AdminGuard><PapersAdd /></AdminGuard>} />
-            <Route path="/admin/add-paper" element={<AdminGuard><PapersAdd /></AdminGuard>} /> {/* Added this route alias */}
-            
-            {/* Catch all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />

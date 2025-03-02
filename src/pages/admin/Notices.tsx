@@ -1,420 +1,562 @@
-
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import AdminLayout from "@/components/AdminLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import {
-  Plus,
-  Edit,
-  Trash,
-  Bell,
-  BellRing,
-  BellOff,
-  CalendarClock,
-  Link as LinkIcon,
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  CheckCircle, 
+  XCircle,
+  Upload,
+  FileText,
+  Image as ImageIcon,
+  Eye
 } from "lucide-react";
+import AdminLayout from "@/components/AdminLayout";
+import AdminGuard from "@/components/AdminGuard";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { useForm } from "react-hook-form";
+import { supabase } from "@/integrations/supabase/client";
 
-type Notice = {
+interface Notice {
   id: string;
   title: string;
   description: string;
   type: "urgent" | "normal";
-  published_at: string;
-  is_active: boolean;
-  link?: string;
+  link?: string | null;
+  published_at: string | null;
+  created_at: string | null;
+  created_by: string | null;
+  is_active: boolean | null;
+  attachments?: NoticeAttachment[];
+}
+
+interface NoticeAttachment {
+  id: string;
+  notice_id: string;
+  file_path: string;
+  file_type: string;
   created_at: string;
-};
+}
 
-export default function Notices() {
-  const [notices, setNotices] = useState<Notice[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState<"urgent" | "normal">("normal");
-  const [link, setLink] = useState("");
-  const [isActive, setIsActive] = useState(true);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [tab, setTab] = useState("all");
+const noticeFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  type: z.enum(["urgent", "normal"]),
+  link: z.string().optional(),
+  files: z.any().optional(),
+});
 
-  const navigate = useNavigate();
+type NoticeFormValues = z.infer<typeof noticeFormSchema>;
+
+const Notices = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
+  const [selectedNotices, setSelectedNotices] = useState<string[]>([]);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchNotices();
-  }, [tab]);
+  const form = useForm<NoticeFormValues>({
+    resolver: zodResolver(noticeFormSchema),
+    defaultValues: {
+      type: "normal",
+    },
+  });
 
-  const fetchNotices = async () => {
-    try {
-      setLoading(true);
-      let query = supabase
+  const { data: notices, isLoading } = useQuery({
+    queryKey: ["notices"],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("notices")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (tab === "active") {
-        query = query.eq("is_active", true);
-      } else if (tab === "inactive") {
-        query = query.eq("is_active", false);
-      }
-
-      const { data, error } = await query;
+        .select(`
+          *,
+          attachments:notice_attachments(*)
+        `)
+        .order("published_at", { ascending: false });
 
       if (error) throw error;
-      setNotices(data as Notice[]);
-    } catch (error) {
-      console.error("Error fetching notices:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch notices",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+      return data as Notice[];
+    },
+  });
+
+  const uploadFiles = async (files: FileList, noticeId: string) => {
+    const uploadPromises = Array.from(files).map(async (file) => {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${noticeId}/${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("notice-attachments")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { error: attachmentError } = await supabase
+        .from("notice_attachments")
+        .insert({
+          notice_id: noticeId,
+          file_path: filePath,
+          file_type: file.type,
+        });
+
+      if (attachmentError) throw attachmentError;
+    });
+
+    await Promise.all(uploadPromises);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const createMutation = useMutation({
+    mutationFn: async (values: NoticeFormValues) => {
+      const { files, ...noticeData } = values;
+      
+      const { data, error } = await supabase
+        .from("notices")
+        .insert({
+          ...noticeData,
+          published_at: new Date().toISOString(),
+          is_active: true,
+        })
+        .select()
+        .single();
 
-    if (!title || !description) {
-      toast({
-        title: "Missing fields",
-        description: "Title and description are required",
-        variant: "destructive",
-      });
-      return;
-    }
+      if (error) throw error;
 
-    try {
-      if (editingId) {
-        // Update existing notice
-        const { error } = await supabase
-          .from("notices")
-          .update({
-            title,
-            description,
-            type,
-            link: link || null,
-            is_active: isActive,
-          })
-          .eq("id", editingId);
-
-        if (error) throw error;
-
-        toast({
-          title: "Notice updated",
-          description: "The notice has been updated successfully",
-        });
-      } else {
-        // Create new notice
-        const { error } = await supabase.from("notices").insert({
-          title,
-          description,
-          type,
-          link: link || null,
-          is_active: isActive,
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: "Notice created",
-          description: "The notice has been created successfully",
-        });
+      if (files && files.length > 0) {
+        await uploadFiles(files, data.id);
       }
 
-      // Reset form and refresh notices
-      resetForm();
-      fetchNotices();
-    } catch (error) {
-      console.error("Error saving notice:", error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] });
+      setIsOpen(false);
+      form.reset();
+      toast({
+        title: "Success",
+        description: "Notice created successfully",
+      });
+    },
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to save notice",
+        description: error.message,
         variant: "destructive",
       });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (values: NoticeFormValues & { id: string }) => {
+      const { files, id, ...noticeData } = values;
+
+      const { error } = await supabase
+        .from("notices")
+        .update(noticeData)
+        .eq("id", id);
+
+      if (error) throw error;
+
+      if (files && files.length > 0) {
+        await uploadFiles(files, id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] });
+      setIsOpen(false);
+      setEditingNotice(null);
+      form.reset();
+      toast({
+        title: "Success",
+        description: "Notice updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase
+        .from("notices")
+        .update({ is_active })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] });
+      toast({
+        title: "Success",
+        description: "Notice status updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteNoticeMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { data: attachments } = await supabase
+        .from("notice_attachments")
+        .select("file_path")
+        .in("notice_id", ids);
+
+      if (attachments?.length) {
+        const filePaths = attachments.map((a) => a.file_path);
+        await supabase.storage.from("notice-attachments").remove(filePaths);
+      }
+
+      const { error } = await supabase
+        .from("notices")
+        .delete()
+        .in("id", ids);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] });
+      setSelectedNotices([]);
+      toast({
+        title: "Success",
+        description: "Notices deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (values: NoticeFormValues) => {
+    if (editingNotice) {
+      updateMutation.mutate({ ...values, id: editingNotice.id });
+    } else {
+      createMutation.mutate(values);
     }
   };
 
   const handleEdit = (notice: Notice) => {
-    setTitle(notice.title);
-    setDescription(notice.description);
-    setType(notice.type);
-    setLink(notice.link || "");
-    setIsActive(notice.is_active);
-    setEditingId(notice.id);
+    setEditingNotice(notice);
+    form.reset({
+      title: notice.title,
+      description: notice.description,
+      type: notice.type,
+      link: notice.link || undefined,
+    });
+    setIsOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this notice?")) return;
-
-    try {
-      const { error } = await supabase.from("notices").delete().eq("id", id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Notice deleted",
-        description: "The notice has been deleted successfully",
-      });
-
-      fetchNotices();
-    } catch (error) {
-      console.error("Error deleting notice:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete notice",
-        variant: "destructive",
-      });
-    }
+  const handleToggleSelect = (id: string) => {
+    setSelectedNotices((prev) =>
+      prev.includes(id)
+        ? prev.filter((noticeId) => noticeId !== id)
+        : [...prev, id]
+    );
   };
 
-  const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setType("normal");
-    setLink("");
-    setIsActive(true);
-    setEditingId(null);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+  const handleDeleteSelected = () => {
+    if (selectedNotices.length === 0) return;
+    deleteNoticeMutation.mutate(selectedNotices);
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Manage Notices</h1>
-        </div>
-
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList>
-            <TabsTrigger value="all">All Notices</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="inactive">Inactive</TabsTrigger>
-          </TabsList>
-          <TabsContent value="all"></TabsContent>
-          <TabsContent value="active"></TabsContent>
-          <TabsContent value="inactive"></TabsContent>
-        </Tabs>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="md:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {notices.length} Notice{notices.length !== 1 && "s"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-4">Loading...</div>
-                ) : notices.length === 0 ? (
-                  <div className="text-center py-4 text-muted-foreground">
-                    No notices found
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {notices.map((notice) => (
-                      <Card key={notice.id}>
-                        <CardContent className="pt-6">
-                          <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-center">
-                              {notice.type === "urgent" ? (
-                                <BellRing className="h-5 w-5 text-red-500 mr-2" />
-                              ) : (
-                                <Bell className="h-5 w-5 text-blue-500 mr-2" />
-                              )}
-                              <h3 className="font-semibold">{notice.title}</h3>
-                            </div>
-                            <div
-                              className={`px-2 py-1 text-xs rounded-full ${
-                                notice.is_active
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
+    <AdminGuard>
+      <AdminLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Manage Notices</h1>
+            <div className="flex items-center gap-4">
+              {selectedNotices.length > 0 && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteSelected}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Selected ({selectedNotices.length})
+                </Button>
+              )}
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Notice
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingNotice ? "Edit Notice" : "Add New Notice"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-4"
+                    >
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Title</FormLabel>
+                            <FormControl>
+                              <Input {...field} required />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea {...field} required />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Type</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
                             >
-                              {notice.is_active ? "Active" : "Inactive"}
-                            </div>
-                          </div>
-
-                          <p className="text-sm text-gray-600 mb-2">
-                            {notice.description}
-                          </p>
-
-                          <div className="flex flex-wrap gap-y-2 text-xs text-gray-500 mb-4">
-                            <div className="flex items-center mr-4">
-                              <CalendarClock className="h-3 w-3 mr-1" />
-                              {formatDate(notice.created_at)}
-                            </div>
-                            {notice.link && (
-                              <div className="flex items-center">
-                                <LinkIcon className="h-3 w-3 mr-1" />
-                                <a
-                                  href={notice.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:underline"
-                                >
-                                  Link
-                                </a>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEdit(notice)}
-                            >
-                              <Edit className="h-4 w-4 mr-1" />
-                              Edit
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDelete(notice.id)}
-                            >
-                              <Trash className="h-4 w-4 mr-1" />
-                              Delete
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select notice type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="normal">Normal</SelectItem>
+                                <SelectItem value="urgent">Urgent</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="link"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Link (Optional)</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="url" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="files"
+                        render={({ field: { onChange, ...field } }) => (
+                          <FormItem>
+                            <FormLabel>Attachments (Optional)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="file"
+                                multiple
+                                accept="image/*,.pdf"
+                                onChange={(e) => onChange(e.target.files)}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" className="w-full">
+                        {editingNotice ? "Update Notice" : "Create Notice"}
+                      </Button>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {editingId ? "Edit Notice" : "Add New Notice"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      id="title"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Notice title"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Notice details"
-                      rows={4}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="link">Link (Optional)</Label>
-                    <Input
-                      id="link"
-                      value={link}
-                      onChange={(e) => setLink(e.target.value)}
-                      placeholder="https://example.com"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Type</Label>
-                    <div className="flex items-center space-x-4">
-                      <div
-                        className={`flex items-center space-x-2 px-3 py-2 rounded-md cursor-pointer ${
-                          type === "normal"
-                            ? "bg-primary/10 text-primary"
-                            : "bg-gray-100"
-                        }`}
-                        onClick={() => setType("normal")}
-                      >
-                        <Bell className="h-4 w-4" />
-                        <span>Normal</span>
-                      </div>
-                      <div
-                        className={`flex items-center space-x-2 px-3 py-2 rounded-md cursor-pointer ${
-                          type === "urgent"
-                            ? "bg-red-100 text-red-600"
-                            : "bg-gray-100"
-                        }`}
-                        onClick={() => setType("urgent")}
-                      >
-                        <BellRing className="h-4 w-4" />
-                        <span>Urgent</span>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {notices?.map((notice) => (
+                <div
+                  key={notice.id}
+                  className={`p-4 rounded-lg border ${
+                    notice.is_active ? "bg-white" : "bg-neutral-50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <Checkbox
+                        checked={selectedNotices.includes(notice.id)}
+                        onCheckedChange={() => handleToggleSelect(notice.id)}
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">{notice.title}</h3>
+                          <span
+                            className={`px-2 py-0.5 text-xs rounded-full ${
+                              notice.type === "urgent"
+                                ? "bg-red-100 text-red-600"
+                                : "bg-primary/10 text-primary"
+                            }`}
+                          >
+                            {notice.type}
+                          </span>
+                        </div>
+                        <p className="text-sm text-neutral-600 mb-2">
+                          {notice.description}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-neutral-500">
+                          <span>
+                            Published:{" "}
+                            {format(new Date(notice.published_at!), "PPp")}
+                          </span>
+                          {notice.link && (
+                            <a
+                              href={notice.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              View Link
+                            </a>
+                          )}
+                        </div>
+                        {notice.attachments && notice.attachments.length > 0 && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-xs text-neutral-500">
+                              Attachments:
+                            </span>
+                            {notice.attachments.map((attachment) => (
+                              <a
+                                key={attachment.id}
+                                href={
+                                  supabase.storage
+                                    .from("notice-attachments")
+                                    .getPublicUrl(attachment.file_path).data
+                                    .publicUrl
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 hover:bg-neutral-100 rounded"
+                                title={attachment.file_path.split("/").pop()}
+                              >
+                                {attachment.file_type.startsWith("image/") ? (
+                                  <ImageIcon className="w-4 h-4 text-neutral-500" />
+                                ) : (
+                                  <FileText className="w-4 h-4 text-neutral-500" />
+                                )}
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="active"
-                      checked={isActive}
-                      onCheckedChange={setIsActive}
-                    />
-                    <Label htmlFor="active" className="cursor-pointer">
-                      {isActive ? (
-                        <span className="flex items-center text-green-600">
-                          <Bell className="h-4 w-4 mr-1" />
-                          Active
-                        </span>
-                      ) : (
-                        <span className="flex items-center text-gray-500">
-                          <BellOff className="h-4 w-4 mr-1" />
-                          Inactive
-                        </span>
-                      )}
-                    </Label>
-                  </div>
-
-                  <div className="flex justify-end space-x-2 pt-2">
-                    {editingId && (
-                      <Button type="button" variant="ghost" onClick={resetForm}>
-                        Cancel
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/news/${notice.id}`)}
+                      >
+                        <Eye className="w-4 h-4 text-neutral-500" />
                       </Button>
-                    )}
-                    <Button type="submit">
-                      {editingId ? (
-                        <>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Update Notice
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Notice
-                        </>
-                      )}
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                          toggleActiveMutation.mutate({
+                            id: notice.id,
+                            is_active: !notice.is_active,
+                          })
+                        }
+                      >
+                        {notice.is_active ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-neutral-400" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(notice)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteNoticeMutation.mutate([notice.id])}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    </AdminLayout>
+      </AdminLayout>
+    </AdminGuard>
   );
-}
+};
+
+export default Notices;

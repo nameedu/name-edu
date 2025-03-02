@@ -14,12 +14,7 @@ import {
   LogOut,
   X,
   Plus,
-  List,
-  BookMarked,
-  FileQuestion,
-  ClipboardList,
-  ScrollText,
-  FileSpreadsheet
+  List
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -84,87 +79,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     {
       title: "Study Materials",
       icon: BookOpen,
-      href: "#",
-      subItems: [
-        {
-          title: "Add New Material",
-          icon: Plus,
-          href: "/admin/add-material",
-        },
-        {
-          title: "Manage Materials",
-          icon: List,
-          href: "/admin/materials",
-        },
-      ],
-    },
-    {
-      title: "Question Bank",
-      icon: FileQuestion,
-      href: "#",
-      subItems: [
-        {
-          title: "Add New Question",
-          icon: Plus,
-          href: "/admin/add-question",
-        },
-        {
-          title: "Manage Questions",
-          icon: List,
-          href: "/admin/questions",
-        },
-      ],
-    },
-    {
-      title: "Assignments",
-      icon: ClipboardList,
-      href: "#",
-      subItems: [
-        {
-          title: "Add New Assignment",
-          icon: Plus,
-          href: "/admin/add-assignment",
-        },
-        {
-          title: "Manage Assignments",
-          icon: List,
-          href: "/admin/assignments",
-        },
-      ],
-    },
-    {
-      title: "Syllabus",
-      icon: ScrollText,
-      href: "#",
-      subItems: [
-        {
-          title: "Add New Syllabus",
-          icon: Plus,
-          href: "/admin/add-syllabus",
-        },
-        {
-          title: "Manage Syllabus",
-          icon: List,
-          href: "/admin/syllabus",
-        },
-      ],
-    },
-    {
-      title: "Previous Papers",
-      icon: FileSpreadsheet,
-      href: "#",
-      subItems: [
-        {
-          title: "Add New Paper",
-          icon: Plus,
-          href: "/admin/add-paper",
-        },
-        {
-          title: "Manage Papers",
-          icon: List,
-          href: "/admin/papers",
-        },
-      ],
+      href: "/admin/materials",
     },
     {
       title: "Video Lectures",
