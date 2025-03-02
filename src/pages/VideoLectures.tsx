@@ -1,15 +1,29 @@
+
 import React, { useEffect, useState } from "react";
 import { PlayCircle, Clock, BookOpen, Tag } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 
+interface Video {
+  id: {
+    videoId: string;
+  };
+  snippet: {
+    title: string;
+    description: string;
+    publishedAt: string;
+    channelTitle: string;
+    liveBroadcastContent: string;
+  };
+}
+
 const API_URL = "https://www.googleapis.com/youtube/v3/search";
 
 const VideoLectures = () => {
-  const [videos, setVideos] = useState([]);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(false);
   const [pageToken, setPageToken] = useState(""); // For pagination
-  const [playingVideo, setPlayingVideo] = useState(null); // Track the currently playing video
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null); // Track the currently playing video
 
   const fetchVideos = async (nextPageToken = "") => {
     const channelId = import.meta.env.VITE_YOUTUBE_CHANNEL_ID; // Use environment variable
@@ -30,13 +44,15 @@ const VideoLectures = () => {
 
       // Filter to get recorded live videos (liveBroadcastContent === "none")
       const recordedLiveVideos = data.items.filter(
-        (video) => video.snippet.liveBroadcastContent === "none"
+        (video: Video) => video.snippet.liveBroadcastContent === "none"
       );
 
       // Sort recorded videos by published date (latest first)
-      const sortedVideos = recordedLiveVideos.sort((a, b) =>
-        new Date(b.snippet.publishedAt) - new Date(a.snippet.publishedAt)
-      );
+      const sortedVideos = recordedLiveVideos.sort((a: Video, b: Video) => {
+        const dateA = new Date(a.snippet.publishedAt).getTime();
+        const dateB = new Date(b.snippet.publishedAt).getTime();
+        return dateB - dateA;
+      });
 
       // Update the videos list with new data
       setVideos((prevVideos) => [...prevVideos, ...sortedVideos]);
@@ -48,15 +64,20 @@ const VideoLectures = () => {
     }
   };
 
-  const handlePlayClick = (videoId) => {
-    const iframe = document.getElementById(`video-${videoId}`);
+  const handlePlayClick = (videoId: string) => {
+    const iframe = document.getElementById(`video-${videoId}`) as HTMLIFrameElement;
     const playIcon = document.getElementById(`play-icon-${videoId}`);
+    
+    if (!iframe || !playIcon) return;
+    
     const src = iframe.src.split("?")[0]; // Remove any previous query parameters
 
     // If a video is already playing, stop it before starting a new one
     if (playingVideo && playingVideo !== videoId) {
-      const previousIframe = document.getElementById(`video-${playingVideo}`);
-      previousIframe.src = previousIframe.src.split("?")[0]; // Remove autoplay from previous iframe
+      const previousIframe = document.getElementById(`video-${playingVideo}`) as HTMLIFrameElement;
+      if (previousIframe) {
+        previousIframe.src = previousIframe.src.split("?")[0]; // Remove autoplay from previous iframe
+      }
     }
 
     // Set autoplay and trigger play
