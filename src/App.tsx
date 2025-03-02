@@ -33,6 +33,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import ListResult from "./pages/admin/ListResult";
 import AddResult from "./pages/admin/AddResult";
 import Notices from "./pages/admin/Notices";
+import ComingSoon from "./pages/admin/ComingSoon";
 import SingleNotice from "@/pages/SingleNotice";
 
 const queryClient = new QueryClient();
@@ -75,6 +76,11 @@ const App = () => {
             <Route path="/admin/results" element={<AdminGuard><ListResult /></AdminGuard>} />
             <Route path="/admin/add-result" element={<AdminGuard><AddResult /></AdminGuard>} />
             <Route path="/admin/notices" element={<AdminGuard><Notices /></AdminGuard>} />
+            <Route path="/admin/courses" element={<AdminGuard><ComingSoon /></AdminGuard>} />
+            <Route path="/admin/faculty" element={<AdminGuard><ComingSoon /></AdminGuard>} />
+            <Route path="/admin/materials" element={<AdminGuard><ComingSoon /></AdminGuard>} />
+            <Route path="/admin/videos" element={<AdminGuard><ComingSoon /></AdminGuard>} />
+            <Route path="/admin/schedule" element={<AdminGuard><ComingSoon /></AdminGuard>} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

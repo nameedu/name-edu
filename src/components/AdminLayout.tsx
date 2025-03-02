@@ -49,16 +49,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       icon: LayoutDashboard,
       href: "/admin",
     },
+
     {
-      title: "Faculty",
-      icon: Users,
-      href: "/admin/faculty",
+      title: "Notices",
+      icon: Bell,
+      href: "/admin/notices",
     },
-    {
-      title: "Courses",
-      icon: GraduationCap,
-      href: "/admin/courses",
-    },
+    
     {
       title: "Results",
       icon: FileText,
@@ -76,6 +73,18 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         },
       ],
     },
+
+    {
+      title: "Faculty",
+      icon: Users,
+      href: "/admin/faculty",
+    },
+    {
+      title: "Courses",
+      icon: GraduationCap,
+      href: "/admin/courses",
+    },
+    
     {
       title: "Study Materials",
       icon: BookOpen,
@@ -86,11 +95,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       icon: Video,
       href: "/admin/videos",
     },
-    {
-      title: "Notices",
-      icon: Bell,
-      href: "/admin/notices",
-    },
+    
     {
       title: "Exam Schedule",
       icon: Calendar,
