@@ -4,6 +4,7 @@ import { Upload, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AdminLayout from "@/components/AdminLayout";
+import AdminGuard from "@/components/AdminGuard";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -141,7 +142,8 @@ const AddResult = () => {
   };
 
   return (
-    <AdminLayout>
+    <AdminGuard>
+      <AdminLayout>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Upload Exam Results</h1>
         
@@ -229,7 +231,9 @@ const AddResult = () => {
           </div>
         </Card>
       </div>
-    </AdminLayout>
+      
+      </AdminLayout>
+      </AdminGuard>
   );
 };
 

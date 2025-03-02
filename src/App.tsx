@@ -2,8 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminGuard from "@/components/AdminGuard";
+import StudentGuard from "@/components/StudentGuard";
 import Index from "./pages/Index";
 import Overview from "./pages/Overview";
 import Faculty from "./pages/Faculty";
@@ -55,20 +56,11 @@ const App = () => {
             <Route path="/online-form" element={<OnlineForm />} />
             <Route path="/online-class" element={<OnlineClass />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/materials" element={<StudyMaterials />} />
-            <Route path="/videos" element={<VideoLectures />} />
-            <Route path="/questionbank" element={<QuestionBank />} />
             <Route path="/news" element={<News />} />
-            <Route path="/assignments" element={<Assignments />} />
-            <Route path="/syllabus" element={<Syllabus />} />
-            <Route path="/papers" element={<PreviousPapers />} />
-            <Route path="/portal" element={<StudentPortal />} />
-            <Route path="/schedule" element={<ExamSchedule />} />
-            <Route path="/payment" element={<FeePayment />} />
+            <Route path="/videos" element={<VideoLectures />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            
             <Route path="/news/:id" element={<SingleNotice />} />
             
             {/* Admin Routes - Protected by AdminGuard */}
@@ -83,6 +75,15 @@ const App = () => {
             <Route path="/admin/schedule" element={<AdminGuard><ComingSoon /></AdminGuard>} />
             <Route path="/admin/links" element={<AdminGuard><ComingSoon /></AdminGuard>} />
             
+            {/* Student Routes - Protected by StudentGuard */}
+            <Route path="/materials" element={<StudentGuard><StudyMaterials /></StudentGuard>} />
+            <Route path="/assignments" element={<StudentGuard><Assignments /></StudentGuard>} />
+            <Route path="/papers" element={<StudentGuard><PreviousPapers /></StudentGuard>} />
+            <Route path="/questionbank" element={<StudentGuard><QuestionBank /></StudentGuard>} />
+            <Route path="/syllabus" element={<StudentGuard><Syllabus /></StudentGuard>} />
+            <Route path="/portal" element={<StudentGuard><StudentPortal /></StudentGuard>} />
+            <Route path="/schedule" element={<StudentGuard><ExamSchedule /></StudentGuard>} />
+            <Route path="/payment" element={<StudentGuard><FeePayment /></StudentGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />

@@ -1,11 +1,11 @@
-import { FileText, Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
+import { FileText, Calendar, Clock, CheckCircle, XCircle, Import } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Layout from "@/components/Layout";
+import StudentLayout from "@/components/StudentLayout";
 
 const Assignments = () => {
   return (
-    <Layout>
+    <StudentLayout>
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Assignments</h1>
@@ -72,7 +72,7 @@ const Assignments = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </StudentLayout>
   );
 };
 

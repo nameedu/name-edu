@@ -1,9 +1,11 @@
 import React from "react";
 import AdminLayout from "@/components/AdminLayout";
+import AdminGuard from "@/components/AdminGuard";
 
 const ComingSoon = () => {
   return (
-    <AdminLayout>
+    <AdminGuard>
+      <AdminLayout>
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="text-center">
           <h1 className="text-5xl font-bold text-gray-800">Under Development</h1>
@@ -12,7 +14,8 @@ const ComingSoon = () => {
           </p>
         </div>
       </div>
-    </AdminLayout>
+      </AdminLayout>
+      </AdminGuard>
   );
 };
 

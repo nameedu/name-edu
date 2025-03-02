@@ -246,8 +246,8 @@ const Layout = ({ children }: LayoutProps) => {
               </Sheet>
             </div>
 
-            <Button className="hidden md:flex bg-primary hover:bg-primary-hover text-white">
-              Student Login
+            <Button className="hidden md:flex bg-primary hover:bg-primary-hover text-white" onClick={() => window.location.href = '/auth'}>
+              Login
             </Button>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { FileText, Calendar, Trash2, Search, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AdminLayout from "@/components/AdminLayout";
+import AdminGuard from "@/components/AdminGuard";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -126,7 +127,8 @@ const ListResult = () => {
   );
 
   return (
-    <AdminLayout>
+    <AdminGuard>
+      <AdminLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
@@ -225,7 +227,8 @@ const ListResult = () => {
           </div>
         )}
       </div>
-    </AdminLayout>
+      </AdminLayout>
+      </AdminGuard>
   );
 };
 

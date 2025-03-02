@@ -1,4 +1,5 @@
 import AdminLayout from "@/components/AdminLayout";
+import AdminGuard from "@/components/AdminGuard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Bell, Link2, Trophy, Video, PlusCircle, Calendar } from "lucide-react";
@@ -57,7 +58,8 @@ const ActionCard = ({
 
 const Dashboard = () => {
   return (
-    <AdminLayout>
+    <AdminGuard>
+      <AdminLayout>
       <div className="space-y-6">
         <header className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">Welcome to NAME Institute!</h1>
@@ -95,7 +97,8 @@ const Dashboard = () => {
           </div>
         </section>
       </div>
-    </AdminLayout>
+      </AdminLayout>
+      </AdminGuard>
   );
 };
 
