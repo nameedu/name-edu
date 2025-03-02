@@ -5,7 +5,6 @@ import {
   LayoutDashboard, 
   Users, 
   GraduationCap, 
-  FileText,
   Video,
   BookOpen,
   Bell,
@@ -14,8 +13,8 @@ import {
   LogOut,
   X,
   Plus,
-  List
-} from "lucide-react";
+  List,
+  Trophy,Link2} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,7 +57,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     
     {
       title: "Results",
-      icon: FileText,
+      icon: Trophy,
       href: "#",
       subItems: [
         {
@@ -100,6 +99,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       title: "Exam Schedule",
       icon: Calendar,
       href: "/admin/schedule",
+    },
+
+    {
+      title: "Important Links",
+      icon: Link2,
+      href: "/admin/links",
     },
   ];
 
