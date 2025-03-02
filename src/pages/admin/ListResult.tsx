@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -47,8 +48,9 @@ const ListResult = () => {
 
   const fetchResults = async () => {
     try {
+      // Get results from the exam_results table instead of a non-existent "results" table
       const { data, error } = await supabase
-        .from('results')
+        .from('exam_results')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -62,7 +64,17 @@ const ListResult = () => {
         return;
       }
 
-      setResults(data || []);
+      // Transform exam_results data into the Result interface format
+      const formattedResults = data?.map(item => ({
+        id: item.id,
+        name: `Candidate ${item.candidate_id}`, // Using candidate_id as name
+        roll_number: item.candidate_id,
+        course: item.exam_id,
+        marks: Number(item.exam_mark),
+        created_at: item.created_at || ''
+      })) || [];
+
+      setResults(formattedResults);
     } catch (error) {
       console.error('Unexpected error fetching results:', error);
       toast({
@@ -76,8 +88,9 @@ const ListResult = () => {
   const deleteResult = async (id: string) => {
     setIsDeleting(true);
     try {
+      // Delete from exam_results instead of "results"
       const { error } = await supabase
-        .from('results')
+        .from('exam_results')
         .delete()
         .eq('id', id);
     
@@ -126,7 +139,7 @@ const ListResult = () => {
 
         <div className="mt-4">
           <Table>
-            <TableCaption>A list of recently Result.</TableCaption>
+            <TableCaption>A list of recently added Results.</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>

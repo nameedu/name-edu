@@ -88,6 +88,7 @@ const App = () => {
             <Route path="/admin/materials/add" element={<AdminGuard><MaterialsAdd /></AdminGuard>} />
             <Route path="/admin/papers" element={<AdminGuard><PapersIndex /></AdminGuard>} />
             <Route path="/admin/papers/add" element={<AdminGuard><PapersAdd /></AdminGuard>} />
+            <Route path="/admin/add-paper" element={<AdminGuard><PapersAdd /></AdminGuard>} /> {/* Added this route alias */}
             
             {/* Catch all route */}
             <Route path="*" element={<NotFound />} />
