@@ -38,7 +38,7 @@ const ListResult = () => {
     } catch (error: any) {
       toast({
         title: "Error fetching files",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive"
       });
     } finally {
@@ -69,7 +69,7 @@ const ListResult = () => {
 
       if (resultsError) {
         console.error('Error deleting results:', resultsError);
-        throw new Error(`Failed to delete results: ${resultsError.message}`);
+        throw new Error(`Failed to delete results: ${resultsError.message || "Unknown error"}`);
       }
 
       // Then delete the file from storage
@@ -80,7 +80,7 @@ const ListResult = () => {
 
       if (storageError) {
         console.error('Error deleting from storage:', storageError);
-        throw new Error(`Failed to delete file from storage: ${storageError.message}`);
+        throw new Error(`Failed to delete file from storage: ${storageError.message || "Unknown error"}`);
       }
 
       // Finally delete the file record
@@ -93,7 +93,7 @@ const ListResult = () => {
 
       if (fileError) {
         console.error('Error deleting file record:', fileError);
-        throw new Error(`Failed to delete file record: ${fileError.message}`);
+        throw new Error(`Failed to delete file record: ${fileError.message || "Unknown error"}`);
       }
 
       // Update local state to remove the deleted file
@@ -112,7 +112,7 @@ const ListResult = () => {
       console.error('Deletion process failed:', error);
       toast({
         title: "Error deleting file",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive"
       });
     } finally {

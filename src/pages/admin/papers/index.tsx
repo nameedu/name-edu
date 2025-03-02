@@ -1,151 +1,202 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import AdminLayout from "@/components/AdminLayout";
+import { Link } from "react-router-dom";
+import { FileText, Calendar, Trash2, Search, Plus, Edit, Eye, FileUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import AdminLayout from "@/components/AdminLayout";
 import { useToast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
+import { previousPapersTable } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  FileText, 
-  Edit, 
-  Trash, 
-  Calendar, 
-  Download, 
-  Plus,
-  BookOpen
-} from "lucide-react";
+import type { PreviousPaper } from "@/types/studentZone";
 
-export default function ManagePapers() {
-  const [papers, setPapers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+const PapersList = () => {
+  const [papers, setPapers] = useState<PreviousPaper[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+
+  const fetchPapers = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await previousPapersTable.getAll();
+      
+      if (error) throw error;
+      setPapers(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error fetching papers",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchPapers();
   }, []);
 
-  const fetchPapers = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('previous_papers')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setPapers(data || []);
-    } catch (error) {
-      console.error('Error fetching papers:', error);
-      toast({
-        title: "Error fetching papers",
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+  const handleDeletePaper = async (id: string, filePath: string) => {
+    if (!confirm('Are you sure you want to delete this paper? This action cannot be undone.')) {
+      return;
     }
-  };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this paper?')) return;
+    setIsDeleting(id);
 
     try {
-      const { error } = await supabase
-        .from('previous_papers')
-        .delete()
-        .eq('id', id);
+      // First delete the file from storage
+      const { error: storageError } = await supabase.storage
+        .from('student_resources')
+        .remove([filePath]);
 
+      if (storageError) throw storageError;
+
+      // Then delete the database record
+      const { error } = await previousPapersTable.delete(id);
+      
       if (error) throw error;
 
+      setPapers(prevPapers => prevPapers.filter(paper => paper.id !== id));
+      
       toast({
-        title: "Paper deleted",
-        description: "The previous paper has been deleted successfully",
+        title: "Success",
+        description: "Paper deleted successfully",
       });
-
-      fetchPapers();
-    } catch (error) {
-      console.error('Error deleting paper:', error);
+    } catch (error: any) {
       toast({
         title: "Error deleting paper",
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: "destructive",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
       });
+    } finally {
+      setIsDeleting(null);
     }
   };
+
+  const filteredPapers = papers.filter(paper =>
+    paper.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    paper.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    paper.paper_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    paper.year.includes(searchTerm)
+  );
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Manage Previous Papers</h1>
-          <Button onClick={() => navigate('/admin/add-paper')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Paper
-          </Button>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Previous Papers</h1>
+            <p className="text-gray-600 mt-1">Manage previous exam papers for students</p>
+          </div>
+          <Link to="/admin/add-paper">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Paper
+            </Button>
+          </Link>
         </div>
 
-        {loading ? (
-          <div className="text-center py-10">Loading...</div>
-        ) : papers.length === 0 ? (
+        <Card className="mb-6">
+          <div className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="text"
+                placeholder="Search by title, subject, type or year..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading papers...</p>
+          </div>
+        ) : filteredPapers.length === 0 ? (
           <Card className="p-8 text-center">
-            <p className="text-gray-500 mb-4">No previous papers found</p>
-            <Button onClick={() => navigate('/admin/add-paper')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Your First Paper
-            </Button>
+            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">
+              {searchTerm ? "No matching papers found" : "No Papers Added"}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {searchTerm 
+                ? "Try adjusting your search terms"
+                : "Add your first previous paper to get started"}
+            </p>
+            {!searchTerm && (
+              <Link to="/admin/add-paper">
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Paper
+                </Button>
+              </Link>
+            )}
           </Card>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {papers.map((paper) => (
-              <Card key={paper.id} className="p-6">
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <FileText className="h-5 w-5 text-primary" />
+          <div className="grid gap-4">
+            {filteredPapers.map((paper) => (
+              <Card key={paper.id} className="p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-primary" />
+                      <span className="font-medium">{paper.title}</span>
                     </div>
-                    <div>
-                      <h3 className="font-semibold line-clamp-1">{paper.title}</h3>
-                      <p className="text-sm text-neutral-500">{paper.paper_type}</p>
+                    <div className="text-sm text-gray-600">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {format(new Date(paper.created_at), 'PPp')}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <Badge variant="outline">{paper.subject}</Badge>
+                        <Badge>{paper.paper_type}</Badge>
+                        <Badge variant="secondary">{paper.year}</Badge>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="space-y-3 mb-4 flex-grow">
-                    <div className="flex items-center text-sm">
-                      <BookOpen className="w-4 h-4 mr-2 text-neutral-500" />
-                      <span>{paper.subject}</span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <Calendar className="w-4 h-4 mr-2 text-neutral-500" />
-                      <span>{paper.year}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" asChild className="flex-1">
-                      <a 
-                        href={supabase.storage.from('student_resources').getPublicUrl(paper.file_path).data.publicUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </a>
-                    </Button>
-                    <Button 
-                      variant="outline" 
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/admin/edit-paper/${paper.id}`)}
+                      onClick={() => {
+                        const fileUrl = supabase.storage
+                          .from('student_resources')
+                          .getPublicUrl(paper.file_path).data.publicUrl;
+                        window.open(fileUrl, '_blank');
+                      }}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Eye className="w-4 h-4 mr-2" />
+                      View
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(paper.id)}
+                      asChild
                     >
-                      <Trash className="h-4 w-4" />
+                      <Link to={`/admin/edit-paper/${paper.id}`}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeletePaper(paper.id, paper.file_path)}
+                      disabled={isDeleting === paper.id}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {isDeleting === paper.id ? 'Deleting...' : 'Delete'}
                     </Button>
                   </div>
                 </div>
@@ -156,4 +207,6 @@ export default function ManagePapers() {
       </div>
     </AdminLayout>
   );
-}
+};
+
+export default PapersList;

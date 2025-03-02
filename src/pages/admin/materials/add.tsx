@@ -1,199 +1,224 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AdminLayout from "@/components/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Upload, AlertCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import AdminLayout from "@/components/AdminLayout";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import FileUploadForm from "@/components/admin/FileUploadForm";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save } from "lucide-react";
+import { studyMaterialsTable } from "@/lib/db";
+import type { StudyMaterial } from "@/types/studentZone";
 
-export default function AddMaterial() {
-  const [title, setTitle] = useState("");
-  const [subject, setSubject] = useState("");
-  const [materialType, setMaterialType] = useState("");
-  const [description, setDescription] = useState("");
-  const [filePath, setFilePath] = useState("");
-  const [publicUrl, setPublicUrl] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+const materialTypes = [
+  "Notes",
+  "Textbook",
+  "Solution",
+  "Practice Paper",
+  "Reference Material",
+  "Other"
+];
 
-  const navigate = useNavigate();
+const AddMaterial = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    subject: "",
+    material_type: "Notes",
+  });
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!title || !subject || !materialType || !description) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSubmitting(true);
+    setIsLoading(true);
 
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      const { data, error } = await supabase
-        .from('study_materials')
-        .insert({
-          title,
-          subject,
-          material_type: materialType,
-          description,
-          file_path: filePath,
-          created_by: userData.user?.id,
-        })
-        .select();
+      let filePath = null;
+
+      // Upload file if selected
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        filePath = `study_materials/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('student_resources')
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw uploadError;
+      }
+
+      // Create database record
+      const { data, error } = await studyMaterialsTable.create({
+        title: formData.title,
+        description: formData.description,
+        subject: formData.subject,
+        material_type: formData.material_type,
+        file_path: filePath,
+        created_by: (await supabase.auth.getUser()).data.user?.id || null
+      });
 
       if (error) throw error;
 
       toast({
-        title: "Material added",
-        description: "The study material has been added successfully",
+        title: "Success",
+        description: "Study material added successfully",
       });
 
       navigate('/admin/materials');
-    } catch (error) {
-      console.error('Error adding material:', error);
+    } catch (error: any) {
+      console.error("Error adding material:", error);
       toast({
         title: "Error adding material",
-        description: error instanceof Error ? error.message : 'Unknown error',
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
-      setSubmitting(false);
+      setIsLoading(false);
     }
-  };
-
-  const handleFileUpload = (newFilePath: string, newPublicUrl: string) => {
-    setFilePath(newFilePath);
-    setPublicUrl(newPublicUrl);
   };
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/admin/materials')}
-            className="mr-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <h1 className="text-2xl font-bold">Add New Study Material</h1>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Material Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., Physics Mechanics Notes"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Subject</Label>
-                  <Input
-                    id="subject"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="e.g., Physics"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="material-type">Material Type</Label>
-                  <Select 
-                    value={materialType} 
-                    onValueChange={setMaterialType}
-                  >
-                    <SelectTrigger id="material-type">
-                      <SelectValue placeholder="Select material type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Notes">Study Notes</SelectItem>
-                      <SelectItem value="Formula Sheet">Formula Sheet</SelectItem>
-                      <SelectItem value="Problem Set">Problem Set</SelectItem>
-                      <SelectItem value="Chapter Notes">Chapter Notes</SelectItem>
-                      <SelectItem value="Reference Guide">Reference Guide</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Enter a description of the material"
-                    rows={3}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Upload Material File (PDF, DOC, DOCX)</Label>
-                  <FileUploadForm 
-                    onFileUpload={handleFileUpload}
-                    contentType="study_materials"
-                  />
-                  
-                  {publicUrl && (
-                    <div className="mt-2">
-                      <p className="text-sm text-green-600">File uploaded successfully!</p>
-                      <a 
-                        href={publicUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:underline"
-                      >
-                        View uploaded file
-                      </a>
-                    </div>
-                  )}
-                </div>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Add Study Material</h1>
+        
+        <Card className="p-6 max-w-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  required
+                />
               </div>
-
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={submitting}
+              
+              <div>
+                <Label htmlFor="subject">Subject</Label>
+                <Input
+                  id="subject"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="material_type">Material Type</Label>
+                <Select
+                  value={formData.material_type}
+                  onValueChange={(value) => handleSelectChange("material_type", value)}
                 >
-                  {submitting ? "Saving..." : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Material
-                    </>
-                  )}
-                </Button>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select material type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {materialTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </form>
-          </CardContent>
+              
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows={4}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="file">Material File (Optional)</Label>
+                <div className="mt-1">
+                  <input
+                    type="file"
+                    id="file"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+                  <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg bg-gray-50">
+                    <label
+                      htmlFor="file"
+                      className="flex flex-col items-center justify-center cursor-pointer"
+                    >
+                      <Upload className="w-10 h-10 text-gray-400 mb-2" />
+                      <span className="text-sm font-medium">
+                        {selectedFile ? selectedFile.name : 'Click to upload file'}
+                      </span>
+                      <span className="text-xs text-gray-500 mt-1">
+                        PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-start">
+              <AlertCircle className="w-5 h-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-gray-600">
+                Make sure to provide accurate information. Study materials will be publicly accessible to students.
+              </p>
+            </div>
+            
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/admin/materials')}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Material"}
+              </Button>
+            </div>
+          </form>
         </Card>
       </div>
     </AdminLayout>
   );
-}
+};
+
+export default AddMaterial;
