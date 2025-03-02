@@ -1,229 +1,199 @@
-
-import { useState, useEffect } from "react";
-import { FileText, Calendar, Trash2, Search, Plus } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import AdminLayout from "@/components/AdminLayout";
-import { useToast } from "@/components/ui/use-toast";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import AdminLayout from "@/components/AdminLayout";
 
-interface ExamFile {
+interface Result {
   id: string;
-  filename: string;
-  exam_id: string;
-  exam_date: string;
-  uploaded_at: string;
-  total_results: number;
-  file_path: string;
+  name: string;
+  roll_number: string;
+  course: string;
+  marks: number;
+  created_at: string;
 }
 
 const ListResult = () => {
-  const [uploadedFiles, setUploadedFiles] = useState<ExamFile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDeletingFile, setIsDeletingFile] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [results, setResults] = useState<Result[]>([]);
+  const [search, setSearch] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
-  const fetchExamFiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('exam_result_files')
-        .select('*')
-        .order('uploaded_at', { ascending: false });
-
-      if (error) throw error;
-      setUploadedFiles(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error fetching files",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchExamFiles();
+    document.title = "List Results | Admin Dashboard";
+    fetchResults();
   }, []);
 
-  const handleDeleteFile = async (fileId: string, filePath: string) => {
-    if (!confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
-      return;
-    }
-
-    setIsDeletingFile(fileId);
-    console.log('Starting deletion process for file:', fileId, 'path:', filePath);
-
+  const fetchResults = async () => {
     try {
-      // First delete all results associated with this file
-      console.log('Deleting exam results...');
-      const { error: resultsError } = await supabase
-        .from('exam_results')
-        .delete()
-        .eq('file_id', fileId)
-        .throwOnError();
+      const { data, error } = await supabase
+        .from('results')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      if (resultsError) {
-        console.error('Error deleting results:', resultsError);
-        throw new Error(`Failed to delete results: ${resultsError.message || "Unknown error"}`);
+      if (error) {
+        console.error('Error fetching results:', error);
+        toast({
+          title: "Error fetching results",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
 
-      // Then delete the file from storage
-      console.log('Deleting file from storage...');
-      const { error: storageError } = await supabase.storage
-        .from('exam_results')
-        .remove([filePath]);
-
-      if (storageError) {
-        console.error('Error deleting from storage:', storageError);
-        throw new Error(`Failed to delete file from storage: ${storageError.message || "Unknown error"}`);
-      }
-
-      // Finally delete the file record
-      console.log('Deleting file record...');
-      const { error: fileError } = await supabase
-        .from('exam_result_files')
-        .delete()
-        .eq('id', fileId)
-        .throwOnError();
-
-      if (fileError) {
-        console.error('Error deleting file record:', fileError);
-        throw new Error(`Failed to delete file record: ${fileError.message || "Unknown error"}`);
-      }
-
-      // Update local state to remove the deleted file
-      setUploadedFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
-
+      setResults(data || []);
+    } catch (error) {
+      console.error('Unexpected error fetching results:', error);
       toast({
-        title: "Success",
-        description: "File and associated results deleted successfully",
+        title: "Unexpected error",
+        description: 'An unexpected error occurred while fetching results.',
+        variant: "destructive",
       });
-      
-      console.log('Deletion process completed successfully');
-
-      // Refresh the file list after successful deletion
-      await fetchExamFiles();
-    } catch (error: any) {
-      console.error('Deletion process failed:', error);
-      toast({
-        title: "Error deleting file",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive"
-      });
-    } finally {
-      setIsDeletingFile(null);
     }
   };
 
-  const filteredFiles = uploadedFiles.filter(file =>
-    file.exam_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    file.filename.toLowerCase().includes(searchTerm.toLowerCase())
+  const deleteResult = async (id: string) => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('results')
+        .delete()
+        .eq('id', id);
+    
+      if (error) {
+        throw error;
+      }
+    
+      toast({
+        title: "Result deleted successfully",
+        description: "The result has been removed from the database.",
+      });
+    
+      // Refresh results after deletion
+      fetchResults();
+    } catch (error) {
+      console.error('Error deleting result:', error);
+      toast({
+        title: "Error deleting result",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const filteredResults = results.filter(result =>
+    result.name.toLowerCase().includes(search.toLowerCase()) ||
+    result.roll_number.toLowerCase().includes(search.toLowerCase()) ||
+    result.course.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <AdminLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Results Management</h1>
-            <p className="text-gray-600 mt-1">View and manage uploaded exam results</p>
-          </div>
-          <Link to="/admin/add-result">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add New Results
-            </Button>
-          </Link>
+      <div className="container max-w-7xl py-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Results</h1>
+          <Input
+            type="search"
+            placeholder="Search by name, roll number, or course..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="max-w-md"
+          />
         </div>
 
-        <Card className="mb-6">
-          <div className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Search by exam ID or filename..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {isLoading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading results...</p>
-          </div>
-        ) : filteredFiles.length === 0 ? (
-          <Card className="p-8 text-center">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">
-              {searchTerm ? "No matching results found" : "No Results Uploaded"}
-            </h2>
-            <p className="text-gray-600 mb-4">
-              {searchTerm 
-                ? "Try adjusting your search terms"
-                : "Upload your first results file to get started"}
-            </p>
-            {!searchTerm && (
-              <Link to="/admin/add-result">
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Upload Results
-                </Button>
-              </Link>
-            )}
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {filteredFiles.map((file) => (
-              <Card key={file.id} className="p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-primary" />
-                      <span className="font-medium">{file.filename}</span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {format(new Date(file.uploaded_at), 'PPp')}
-                        </span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                          Exam ID: {file.exam_id}
-                        </span>
-                        <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
-                          {file.total_results} Results
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteFile(file.id, file.file_path)}
-                      disabled={isDeletingFile === file.id}
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      {isDeletingFile === file.id ? 'Deleting...' : 'Delete'}
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
+        <div className="mt-4">
+          <Table>
+            <TableCaption>A list of recently Result.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Name</TableHead>
+                <TableHead>Roll No.</TableHead>
+                <TableHead>Course</TableHead>
+                <TableHead>Marks</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredResults.map((result) => (
+                <TableRow key={result.id}>
+                  <TableCell className="font-medium">{result.name}</TableCell>
+                  <TableCell>{result.roll_number}</TableCell>
+                  <TableCell>{result.course}</TableCell>
+                  <TableCell>{result.marks}</TableCell>
+                  <TableCell>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="destructive" size="sm">Delete</Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Are you absolutely sure?</DialogTitle>
+                          <DialogDescription>
+                            This action cannot be undone. This will permanently delete result from our servers.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="name" className="text-right">
+                              Name
+                            </Label>
+                            <Input type="text" id="name" value={result.name} className="col-span-3" disabled />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="roll_number" className="text-right">
+                              Roll No.
+                            </Label>
+                            <Input type="text" id="roll_number" value={result.roll_number} className="col-span-3" disabled />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="course" className="text-right">
+                              Course
+                            </Label>
+                            <Input type="text" id="course" value={result.course} className="col-span-3" disabled />
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button type="button" variant="secondary" onClick={() => {
+                            const dialog = document.querySelector('[data-state="open"]');
+                            if (dialog) {
+                              (dialog as HTMLDialogElement).close();
+                            }
+                          }}>Cancel</Button>
+                          <Button type="submit" variant="destructive" onClick={() => deleteResult(result.id)} disabled={isDeleting}>
+                            {isDeleting ? "Deleting..." : "Delete"}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </AdminLayout>
   );

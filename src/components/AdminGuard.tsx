@@ -45,12 +45,18 @@ const AdminGuard = ({ children }: AdminGuardProps) => {
         .eq('user_id', session.user.id)
         .single();
 
-      if (roleError || roleData?.role !== 'admin') {
-        throw new Error('Unauthorized access');
+      if (roleError) {
+        console.error('Error fetching user role:', roleError);
+        throw new Error('Error checking permissions');
+      }
+
+      if (roleData?.role !== 'admin') {
+        throw new Error('Insufficient permissions');
       }
 
       setIsLoading(false);
     } catch (error) {
+      console.error('AdminGuard error:', error);
       toast({
         title: "Access Denied",
         description: "You must be logged in as an administrator to access this page",
@@ -63,7 +69,10 @@ const AdminGuard = ({ children }: AdminGuardProps) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+          <p className="text-sm text-muted-foreground">Verifying admin access...</p>
+        </div>
       </div>
     );
   }
