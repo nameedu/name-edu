@@ -24,7 +24,7 @@ const Footer = () => {
                 <Phone className="h-4 w-4 mr-2" />
                 +977 1 5331144
               </a>
-              <a href="mailto:info@example.com" className="flex items-center text-sm text-neutral-300 hover:text-white">
+              <a href="mailto:info@name.edu.np" className="flex items-center text-sm text-neutral-300 hover:text-white">
                 <Mail className="h-4 w-4 mr-2" />
                 info@name.edu.np
               </a>

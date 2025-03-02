@@ -272,7 +272,9 @@ const Index = () => {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full">Learn More</Button>
+                <Button className="w-full" onClick={() => window.location.href = '/courses'}>
+  Learn More
+</Button>
               </Card>
             ))}
           </div>
