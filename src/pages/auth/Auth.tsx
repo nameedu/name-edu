@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,19 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const role = await getUserRole(session.user.id);
+        handleRoleBasedRedirect(role);
+      }
+    };
+    
+    checkAuth();
+  }, []);
+
   const getUserRole = async (userId: string) => {
     const { data, error } = await supabase
       .from('user_roles')
@@ -31,9 +44,7 @@ const Auth = () => {
     return data?.role || 'student';
   };
 
-  const handleRoleBasedRedirect = async (userId: string) => {
-    const role = await getUserRole(userId);
-    
+  const handleRoleBasedRedirect = (role: string) => {
     switch (role) {
       case 'admin':
         navigate('/admin');
@@ -67,7 +78,8 @@ const Auth = () => {
 
       // Redirect based on role
       if (data.user) {
-        await handleRoleBasedRedirect(data.user.id);
+        const role = await getUserRole(data.user.id);
+        handleRoleBasedRedirect(role);
       }
 
     } catch (error: any) {

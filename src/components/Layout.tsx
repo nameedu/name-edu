@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import Footer from "./Footer";
 import { useState } from "react";
+import AuthButton from "./AuthButton";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -166,9 +167,7 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
 
             <div className="flex md:hidden items-center gap-4">
-              <Button className="bg-primary hover:bg-primary-hover text-white text-sm">
-                Student Login
-              </Button>
+              <AuthButton />
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="md:hidden">
@@ -176,79 +175,78 @@ const Layout = ({ children }: LayoutProps) => {
                   </Button>
                 </SheetTrigger>
                 <SheetContent
-  side="right"
-  className="w-[320px] sm:w-[400px] max-h-[80vh] overflow-y-auto p-4"
->
-  <SheetHeader>
-    <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
-  </SheetHeader>
-  
-  <div className="flex flex-col gap-6 mt-4">
-    {/* About Us Section */}
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-neutral-500">About Us</h3>
-      {aboutUsLinks.map((item) => (
-        <Link
-          key={item.title}
-          to={item.href}
-          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
-        >
-          <item.icon className="h-5 w-5 text-primary" />
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">{item.title}</span>
-            <p className="text-xs text-neutral-600">{item.description}</p>
-          </div>
-        </Link>
-      ))}
-    </div>
+                  side="right"
+                  className="w-[320px] sm:w-[400px] max-h-[80vh] overflow-y-auto p-4"
+                >
+                  <SheetHeader>
+                    <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
+                  </SheetHeader>
+                  
+                  <div className="flex flex-col gap-6 mt-4">
+                    {/* About Us Section */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-neutral-500">About Us</h3>
+                      {aboutUsLinks.map((item) => (
+                        <Link
+                          key={item.title}
+                          to={item.href}
+                          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
+                        >
+                          <item.icon className="h-5 w-5 text-primary" />
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{item.title}</span>
+                            <p className="text-xs text-neutral-600">{item.description}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
 
-    {/* Student Zone Section */}
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-neutral-500">Student Zone</h3>
-      {studentZoneLinks.map((item) => (
-        <Link
-          key={item.title}
-          to={item.href}
-          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
-        >
-          <item.icon className="h-5 w-5 text-primary" />
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">{item.title}</span>
-            <p className="text-xs text-neutral-600">{item.description}</p>
-          </div>
-        </Link>
-      ))}
-    </div>
+                    {/* Student Zone Section */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-neutral-500">Student Zone</h3>
+                      {studentZoneLinks.map((item) => (
+                        <Link
+                          key={item.title}
+                          to={item.href}
+                          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
+                        >
+                          <item.icon className="h-5 w-5 text-primary" />
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{item.title}</span>
+                            <p className="text-xs text-neutral-600">{item.description}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
 
-    {/* Quick Links Section */}
-    <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-neutral-500">Quick Links</h3>
-      {[
-        { to: "/courses", icon: GraduationCap, label: "Courses" },
-        { to: "/results", icon: Award, label: "Results" },
-        { to: "/online-form", icon: FileText, label: "Online Form" },
-        { to: "/online-class", icon: Video, label: "Online Class" },
-        { to: "/contact", icon: MessageSquare, label: "Contact" },
-      ].map(({ to, icon: Icon, label }) => (
-        <Link
-          key={label}
-          to={to}
-          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
-        >
-          <Icon className="h-5 w-5 text-primary" />
-          <span className="text-sm font-medium">{label}</span>
-        </Link>
-      ))}
-    </div>
-  </div>
-</SheetContent>
-
+                    {/* Quick Links Section */}
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-neutral-500">Quick Links</h3>
+                      {[
+                        { to: "/courses", icon: GraduationCap, label: "Courses" },
+                        { to: "/results", icon: Award, label: "Results" },
+                        { to: "/online-form", icon: FileText, label: "Online Form" },
+                        { to: "/online-class", icon: Video, label: "Online Class" },
+                        { to: "/contact", icon: MessageSquare, label: "Contact" },
+                      ].map(({ to, icon: Icon, label }) => (
+                        <Link
+                          key={label}
+                          to={to}
+                          className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-neutral-100 active:bg-neutral-200 focus:bg-neutral-200"
+                        >
+                          <Icon className="h-5 w-5 text-primary" />
+                          <span className="text-sm font-medium">{label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </SheetContent>
               </Sheet>
             </div>
 
-            <Button className="hidden md:flex bg-primary hover:bg-primary-hover text-white" onClick={() => window.location.href = '/auth'}>
-              Login
-            </Button>
+            <div className="hidden md:block">
+              <AuthButton />
+            </div>
           </div>
         </div>
       </nav>
