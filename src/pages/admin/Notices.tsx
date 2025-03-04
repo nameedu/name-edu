@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Eye, PlusCircle, FileText, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import AdminLayout from '@/components/AdminLayout';
 import {
   Dialog,
   DialogContent,
@@ -85,7 +85,6 @@ const Notices = () => {
       
       setNotices(data || []);
       
-      // Fetch attachments for each notice
       const noticeIds = data?.map(notice => notice.id) || [];
       if (noticeIds.length > 0) {
         const { data: attachments, error: attachmentsError } = await supabase
@@ -95,7 +94,6 @@ const Notices = () => {
           
         if (attachmentsError) throw attachmentsError;
         
-        // Group attachments by notice_id
         const attachmentsByNoticeId: Record<string, NoticeAttachment[]> = {};
         attachments?.forEach(attachment => {
           if (!attachmentsByNoticeId[attachment.notice_id]) {
@@ -145,7 +143,6 @@ const Notices = () => {
     setFormData(notice);
     setIsEditMode(true);
     
-    // Fetch attachments for this specific notice if needed
     if (!noticeAttachments[notice.id]) {
       const { data, error } = await supabase
         .from('notice_attachments')
@@ -189,13 +186,11 @@ const Notices = () => {
 
   const handleDeleteNotice = async (id: string) => {
     try {
-      // First delete any attachments from storage
       const attachments = noticeAttachments[id] || [];
       for (const attachment of attachments) {
         await deleteFile(attachment.file_path);
       }
       
-      // Then delete the notice record (attachments will cascade delete due to FK constraint)
       const { error } = await supabase
         .from('notices')
         .delete()
@@ -225,7 +220,6 @@ const Notices = () => {
       let noticeId = formData.id;
       
       if (isEditMode) {
-        // Update existing notice
         const { error } = await supabase
           .from('notices')
           .update({
@@ -239,7 +233,6 @@ const Notices = () => {
           
         if (error) throw error;
       } else {
-        // Create new notice
         const { data, error } = await supabase
           .from('notices')
           .insert({
@@ -254,15 +247,12 @@ const Notices = () => {
         noticeId = data[0].id;
       }
       
-      // Handle file uploads if any
       if (selectedFiles.length > 0) {
         for (const file of selectedFiles) {
-          // Upload file to storage
           const { filePath, error: uploadError } = await uploadFile(file);
           if (uploadError) throw uploadError;
           
           if (filePath) {
-            // Save file reference in database
             const { error: attachmentError } = await supabase
               .from('notice_attachments')
               .insert({
@@ -284,7 +274,7 @@ const Notices = () => {
       toast.error(`Failed to ${isEditMode ? 'update' : 'create'} notice`);
     }
   };
-  
+
   const getAttachmentIcon = (fileType: string) => {
     if (fileType.includes('image')) {
       return <Image className="h-4 w-4" />;
@@ -307,213 +297,210 @@ const Notices = () => {
   };
 
   return (
-    <AdminGuard>
-      <AdminLayout>
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Manage Notices</h1>
-        <Button onClick={openAddDialog}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add New Notice
-        </Button>
-      </div>
+    <AdminLayout>
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Manage Notices</h1>
+          <Button onClick={openAddDialog}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Notice
+          </Button>
+        </div>
 
-      {loading ? (
-        <div className="flex justify-center py-10">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      ) : notices.length === 0 ? (
-        <div className="text-center py-10">
-          <p className="text-muted-foreground">No notices found. Click 'Add New Notice' to create one.</p>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {notices.map((notice) => (
-            <div key={notice.id} className="bg-card rounded-lg shadow p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-lg">{notice.title}</h3>
-                    {notice.type === 'urgent' && (
-                      <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Urgent</span>
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        ) : notices.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-muted-foreground">No notices found. Click 'Add New Notice' to create one.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {notices.map((notice) => (
+              <div key={notice.id} className="bg-card rounded-lg shadow p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-lg">{notice.title}</h3>
+                      {notice.type === 'urgent' && (
+                        <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Urgent</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Published: {formatDate(notice.published_at)}
+                    </p>
+                    <p className="text-sm mb-4">{notice.description}</p>
+                    
+                    {noticeAttachments[notice.id] && noticeAttachments[notice.id].length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-xs text-muted-foreground mb-1">Attachments:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {noticeAttachments[notice.id].map((attachment) => (
+                            <Button 
+                              key={attachment.id}
+                              variant="outline" 
+                              size="sm"
+                              className="flex items-center gap-1 text-xs"
+                              onClick={() => handleViewAttachment(attachment.file_path)}
+                            >
+                              {getAttachmentIcon(attachment.file_type)}
+                              <span className="truncate max-w-[100px]">
+                                {attachment.file_path.split('-').pop()}
+                              </span>
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {notice.link && (
+                      <Link 
+                        to={notice.link.startsWith('http') ? notice.link : `https://${notice.link}`} 
+                        target="_blank" 
+                        className="text-primary text-sm hover:underline"
+                      >
+                        View External Link
+                      </Link>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Published: {formatDate(notice.published_at)}
-                  </p>
-                  <p className="text-sm mb-4">{notice.description}</p>
-                  
-                  {/* Display attachments if any */}
-                  {noticeAttachments[notice.id] && noticeAttachments[notice.id].length > 0 && (
-                    <div className="mb-2">
-                      <p className="text-xs text-muted-foreground mb-1">Attachments:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {noticeAttachments[notice.id].map((attachment) => (
-                          <Button 
-                            key={attachment.id}
-                            variant="outline" 
-                            size="sm"
-                            className="flex items-center gap-1 text-xs"
-                            onClick={() => handleViewAttachment(attachment.file_path)}
-                          >
-                            {getAttachmentIcon(attachment.file_type)}
-                            <span className="truncate max-w-[100px]">
-                              {attachment.file_path.split('-').pop()}
-                            </span>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {notice.link && (
-                    <Link 
-                      to={notice.link.startsWith('http') ? notice.link : `https://${notice.link}`} 
-                      target="_blank" 
-                      className="text-primary text-sm hover:underline"
-                    >
-                      View External Link
-                    </Link>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="icon" onClick={() => openEditDialog(notice)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="icon">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the notice
-                          and all its attachments.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteNotice(notice.id)}>
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>{isEditMode ? 'Edit Notice' : 'Add New Notice'}</DialogTitle>
-            <DialogDescription>
-              {isEditMode 
-                ? 'Make changes to the existing notice.' 
-                : 'Fill in the details to create a new notice.'}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  required
-                  rows={4}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="type">Type</Label>
-                <Select value={formData.type} onValueChange={handleSelectChange}>
-                  <SelectTrigger id="type">
-                    <SelectValue placeholder="Select notice type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="link">External Link (Optional)</Label>
-                <Input
-                  id="link"
-                  name="link"
-                  value={formData.link || ''}
-                  onChange={handleInputChange}
-                  placeholder="https://example.com"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label>Attachments</Label>
-                <FileUploadZone
-                  onFilesSelected={handleFilesSelected}
-                  selectedFiles={selectedFiles}
-                  onRemoveFile={handleRemoveFile}
-                  maxFiles={3}
-                />
-              </div>
-              
-              {isEditMode && noticeAttachments[formData.id] && noticeAttachments[formData.id].length > 0 && (
-                <div className="grid gap-2">
-                  <Label>Existing Attachments</Label>
-                  <div className="flex flex-wrap gap-2 p-2 bg-secondary/50 rounded-md">
-                    {noticeAttachments[formData.id].map((attachment) => (
-                      <div key={attachment.id} className="flex items-center gap-2 p-2 bg-background rounded-md">
-                        {getAttachmentIcon(attachment.file_type)}
-                        <span className="text-sm truncate max-w-[200px]">
-                          {attachment.file_path.split('-').pop()}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleViewAttachment(attachment.file_path)}
-                        >
-                          <Eye className="h-4 w-4" />
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="icon" onClick={() => openEditDialog(notice)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="icon">
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </div>
-                    ))}
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the notice
+                            and all its attachments.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteNotice(notice.id)}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleDialogClose}>
-                Cancel
-              </Button>
-              <Button type="submit">
-                {isEditMode ? 'Update Notice' : 'Create Notice'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>{isEditMode ? 'Edit Notice' : 'Add New Notice'}</DialogTitle>
+              <DialogDescription>
+                {isEditMode 
+                  ? 'Make changes to the existing notice.' 
+                  : 'Fill in the details to create a new notice.'}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    required
+                    rows={4}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="type">Type</Label>
+                  <Select value={formData.type} onValueChange={handleSelectChange}>
+                    <SelectTrigger id="type">
+                      <SelectValue placeholder="Select notice type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="link">External Link (Optional)</Label>
+                  <Input
+                    id="link"
+                    name="link"
+                    value={formData.link || ''}
+                    onChange={handleInputChange}
+                    placeholder="https://example.com"
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label>Attachments</Label>
+                  <FileUploadZone
+                    onFilesSelected={handleFilesSelected}
+                    selectedFiles={selectedFiles}
+                    onRemoveFile={handleRemoveFile}
+                    maxFiles={3}
+                  />
+                </div>
+                
+                {isEditMode && noticeAttachments[formData.id] && noticeAttachments[formData.id].length > 0 && (
+                  <div className="grid gap-2">
+                    <Label>Existing Attachments</Label>
+                    <div className="flex flex-wrap gap-2 p-2 bg-secondary/50 rounded-md">
+                      {noticeAttachments[formData.id].map((attachment) => (
+                        <div key={attachment.id} className="flex items-center gap-2 p-2 bg-background rounded-md">
+                          {getAttachmentIcon(attachment.file_type)}
+                          <span className="text-sm truncate max-w-[200px]">
+                            {attachment.file_path.split('-').pop()}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => handleViewAttachment(attachment.file_path)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleDialogClose}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {isEditMode ? 'Update Notice' : 'Create Notice'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
     </AdminLayout>
-      </AdminGuard>
   );
 };
 
