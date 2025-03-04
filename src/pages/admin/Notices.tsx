@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -14,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
+import FileUploadZone from "@/components/FileUploadZone";
 
 interface Notice {
   id: string;
@@ -23,6 +23,7 @@ interface Notice {
   link?: string;
   published_at: string;
   is_active: boolean;
+  attachments?: { id: string; file_path: string; file_type: string }[];
 }
 
 const Notices = () => {
@@ -33,17 +34,16 @@ const Notices = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [activeTab, setActiveTab] = useState("all");
-  
-  // New notice form state
   const [newNotice, setNewNotice] = useState({
     title: "",
     description: "",
     type: "normal" as "normal" | "urgent",
     link: "",
   });
-  
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     fetchNotices();
   }, []);
@@ -53,7 +53,10 @@ const Notices = () => {
     try {
       const { data, error } = await supabase
         .from("notices")
-        .select("*")
+        .select(`
+          *,
+          attachments:notice_attachments(*)
+        `)
         .order("published_at", { ascending: false });
 
       if (error) throw error;
@@ -69,7 +72,7 @@ const Notices = () => {
       setIsLoading(false);
     }
   };
-  
+
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
@@ -94,7 +97,44 @@ const Notices = () => {
       });
     }
   };
-  
+
+  const handleEdit = (notice: Notice) => {
+    setSelectedNotice(notice);
+    setNewNotice({
+      title: notice.title,
+      description: notice.description,
+      type: notice.type,
+      link: notice.link || "",
+    });
+    setIsEditMode(true);
+    setIsDialogOpen(true);
+  };
+
+  const uploadFiles = async (noticeId: string) => {
+    const uploadPromises = selectedFiles.map(async (file) => {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${noticeId}/${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('notice-attachments')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { error: dbError } = await supabase
+        .from('notice_attachments')
+        .insert({
+          notice_id: noticeId,
+          file_path: filePath,
+          file_type: file.type
+        });
+
+      if (dbError) throw dbError;
+    });
+
+    await Promise.all(uploadPromises);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -108,28 +148,53 @@ const Notices = () => {
     }
     
     try {
-      const { data, error } = await supabase
-        .from("notices")
-        .insert({
-          title: newNotice.title,
-          description: newNotice.description,
-          type: newNotice.type,
-          link: newNotice.link || null,
-          is_active: true
-        })
-        .select();
+      if (isEditMode && selectedNotice) {
+        const { error } = await supabase
+          .from("notices")
+          .update({
+            title: newNotice.title,
+            description: newNotice.description,
+            type: newNotice.type,
+            link: newNotice.link || null,
+          })
+          .eq("id", selectedNotice.id);
 
-      if (error) throw error;
-      
-      toast({
-        title: "Success",
-        description: "Notice created successfully",
-      });
-      
-      if (data) {
-        setNotices([data[0], ...notices]);
+        if (error) throw error;
+
+        if (selectedFiles.length > 0) {
+          await uploadFiles(selectedNotice.id);
+        }
+
+        toast({
+          title: "Success",
+          description: "Notice updated successfully",
+        });
+
+      } else {
+        const { data, error } = await supabase
+          .from("notices")
+          .insert({
+            title: newNotice.title,
+            description: newNotice.description,
+            type: newNotice.type,
+            link: newNotice.link || null,
+            is_active: true
+          })
+          .select();
+
+        if (error) throw error;
+        
+        if (data && selectedFiles.length > 0) {
+          await uploadFiles(data[0].id);
+        }
+        
+        toast({
+          title: "Success",
+          description: "Notice created successfully",
+        });
       }
       
+      await fetchNotices();
       setIsDialogOpen(false);
       setNewNotice({
         title: "",
@@ -137,6 +202,8 @@ const Notices = () => {
         type: "normal",
         link: "",
       });
+      setSelectedFiles([]);
+      setIsEditMode(false);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -145,7 +212,7 @@ const Notices = () => {
       });
     }
   };
-  
+
   const filteredNotices = notices.filter(notice => {
     const matchesSearch = notice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          notice.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -263,13 +330,24 @@ const Notices = () => {
         </div>
       </div>
 
-      {/* Add Notice Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setSelectedFiles([]);
+          setIsEditMode(false);
+          setNewNotice({
+            title: "",
+            description: "",
+            type: "normal",
+            link: "",
+          });
+        }
+        setIsDialogOpen(open);
+      }}>
         <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
-            <DialogTitle>Add New Notice</DialogTitle>
+            <DialogTitle>{isEditMode ? "Edit Notice" : "Add New Notice"}</DialogTitle>
             <DialogDescription>
-              Create a new notice or announcement for the platform.
+              {isEditMode ? "Update an existing notice." : "Create a new notice or announcement for the platform."}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -324,19 +402,31 @@ const Notices = () => {
               </div>
             </div>
             
+            <div className="space-y-2">
+              <Label>Attachments</Label>
+              <FileUploadZone
+                onFilesSelected={(files) => setSelectedFiles([...selectedFiles, ...files])}
+                selectedFiles={selectedFiles}
+                onRemoveFile={(index) => {
+                  const newFiles = [...selectedFiles];
+                  newFiles.splice(index, 1);
+                  setSelectedFiles(newFiles);
+                }}
+              />
+            </div>
+            
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit">
-                Create Notice
+                {isEditMode ? "Update" : "Create"} Notice
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
