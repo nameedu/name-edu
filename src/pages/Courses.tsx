@@ -1,54 +1,23 @@
+
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Layout from "@/components/Layout";
 
-const Courses = () => {
-  const [selectedCourse, setSelectedCourse] = useState(null);
-
-  return (
-    <Layout>
-      <div className="pt-24 pb-16 px-4">
-        <div className="container mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Our Courses</h1>
-          <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
-            Comprehensive courses designed to help you excel in your academic journey
-          </p>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {courses.map((course, index) => (
-              <Card key={index} className="overflow-hidden">
-                <div className="aspect-video bg-neutral-100 relative">
-                  <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
-                  <p className="text-neutral-600 mb-4">{course.shortDescription}</p>
-                  <Button className="w-full" onClick={() => setSelectedCourse(course)}>Learn More</Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {selectedCourse && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full max-h-[80vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">{selectedCourse.title}</h2>
-            <img src={selectedCourse.image} alt={selectedCourse.title} className="w-full h-40 object-cover mb-4" />
-            <p className="text-neutral-600 mb-4 text-justify">{selectedCourse.longDescription}</p>
-            <Button className="w-full" onClick={() => setSelectedCourse(null)}>Close</Button>
-          </div>
-        </div>
-      )}
-    </Layout>
-  );
+// Course categories
+const CATEGORIES = {
+  MEDICAL: "Medical Entrance",
+  ALLIED: "Allied Health Sciences",
+  AGRICULTURE: "Agriculture & Technology"
 };
 
-const courses = [
+// Add category to each course
+const coursesWithCategories = [
   {
     title: "MBBS",
+    category: CATEGORIES.MEDICAL,
     shortDescription: "Intensive coaching for MBBS entrance exams",
     longDescription: (
       <div>
@@ -67,6 +36,7 @@ const courses = [
   },
   {
     title: "BDS",
+    category: CATEGORIES.MEDICAL,
     shortDescription: "Comprehensive course for BDS entrance exam success",
     longDescription: (
       <div>
@@ -85,6 +55,7 @@ const courses = [
   },
   {
     title: "BSc Nursing",
+    category: CATEGORIES.ALLIED,
     shortDescription: "Structured preparation for BSc Nursing entrance exams",
     longDescription: (
       <div>
@@ -103,6 +74,7 @@ const courses = [
   },
   {
     title: "BPH",
+    category: CATEGORIES.ALLIED,
     shortDescription: "Coaching for Bachelor of Public Health (BPH) entrance exams",
     longDescription: (
       <div>
@@ -121,6 +93,7 @@ const courses = [
   },
   {
     title: "B Pharmacy",
+    category: CATEGORIES.ALLIED,
     shortDescription: "Specialized coaching for B Pharmacy aspirants",
     longDescription: (
       <div>
@@ -139,6 +112,7 @@ const courses = [
   },
   {
     title: "B Optometry",
+    category: CATEGORIES.ALLIED,
     shortDescription: "Focused preparation for Bachelor of Optometry entrance exams",
     longDescription: (
       <div>
@@ -157,6 +131,7 @@ const courses = [
   },
   {
     title: "BPT",
+    category: CATEGORIES.ALLIED,
     shortDescription: "Intensive preparation for Bachelor of Physiotherapy (BPT) entrance exams",
     longDescription: (
       <div>
@@ -175,6 +150,7 @@ const courses = [
   },
   {
     title: "BASLP",
+    category: CATEGORIES.ALLIED,
     shortDescription: "Guidance for Bachelor of Audiology and Speech-Language Pathology (BASLP) exams",
     longDescription: (
       <div>
@@ -193,6 +169,7 @@ const courses = [
   },
   {
     title: "BMIT",
+    category: CATEGORIES.ALLIED,
     shortDescription: "Comprehensive coaching for Bachelor of Medical Imaging Technology (BMIT)",
     longDescription: (
       <div>
@@ -211,6 +188,7 @@ const courses = [
   },
   {
     title: "BMLT",
+    category: CATEGORIES.ALLIED,
     shortDescription: "Expert guidance for Bachelor of Medical Laboratory Technology (BMLT)",
     longDescription: (
       <div>
@@ -229,6 +207,7 @@ const courses = [
   },
   {
     title: "B Tech",
+    category: CATEGORIES.AGRICULTURE,
     shortDescription: "Focused coaching for Bachelor of Technology (B Tech) entrance exams",
     longDescription: (
       <div>
@@ -247,6 +226,7 @@ const courses = [
   },
   {
     title: "B Forestry",
+    category: CATEGORIES.AGRICULTURE,
     shortDescription: "Preparation for Bachelor of Forestry entrance exams",
     longDescription: (
       <div>
@@ -265,6 +245,7 @@ const courses = [
   },
   {
     title: "B Veterinary",
+    category: CATEGORIES.AGRICULTURE,
     shortDescription: "Coaching for Bachelor of Veterinary Science entrance exams",
     longDescription: (
       <div>
@@ -283,6 +264,7 @@ const courses = [
   },
   {
     title: "BSc Agriculture",
+    category: CATEGORIES.AGRICULTURE,
     shortDescription: "Expert coaching for BSc Agriculture entrance exams",
     longDescription: (
       <div>
@@ -300,5 +282,108 @@ const courses = [
     image: "/Images/bsc-agriculture.jpg"
   },
 ];
+
+const CourseCard = ({ course, onSelect }) => (
+  <Card className="overflow-hidden h-full flex flex-col">
+    <div className="aspect-video bg-neutral-100 relative">
+      <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+    </div>
+    <CardHeader className="p-4 pb-0">
+      <CardTitle className="text-xl">{course.title}</CardTitle>
+    </CardHeader>
+    <CardContent className="p-4 pt-2 flex-grow">
+      <p className="text-neutral-600">{course.shortDescription}</p>
+    </CardContent>
+    <CardFooter className="p-4 pt-0">
+      <Button className="w-full" onClick={() => onSelect(course)}>
+        Learn More
+      </Button>
+    </CardFooter>
+  </Card>
+);
+
+const Courses = () => {
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
+
+  const filteredCourses = activeTab === "all" 
+    ? coursesWithCategories 
+    : coursesWithCategories.filter(course => course.category === activeTab);
+
+  return (
+    <Layout>
+      <div className="pt-24 pb-16 px-4">
+        <div className="container mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">Our Courses</h1>
+          <p className="text-lg text-neutral-600 text-center max-w-3xl mx-auto mb-12">
+            Comprehensive courses designed to help you excel in your academic journey
+          </p>
+
+          <Tabs defaultValue="all" className="mb-8" value={activeTab} onValueChange={setActiveTab}>
+            <div className="flex justify-center mb-8">
+              <TabsList className="mb-2">
+                <TabsTrigger value="all">All Courses</TabsTrigger>
+                <TabsTrigger value={CATEGORIES.MEDICAL}>{CATEGORIES.MEDICAL}</TabsTrigger>
+                <TabsTrigger value={CATEGORIES.ALLIED}>{CATEGORIES.ALLIED}</TabsTrigger>
+                <TabsTrigger value={CATEGORIES.AGRICULTURE}>{CATEGORIES.AGRICULTURE}</TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="all" className="mt-0">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {coursesWithCategories.map((course, index) => (
+                  <CourseCard key={index} course={course} onSelect={setSelectedCourse} />
+                ))}
+              </div>
+            </TabsContent>
+
+            {Object.values(CATEGORIES).map((category) => (
+              <TabsContent key={category} value={category} className="mt-0">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredCourses.map((course, index) => (
+                    <CourseCard key={index} course={course} onSelect={setSelectedCourse} />
+                  ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </div>
+      </div>
+
+      {/* Replace custom modal with shadcn Dialog component */}
+      <Dialog open={selectedCourse !== null} onOpenChange={(open) => !open && setSelectedCourse(null)}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          {selectedCourse && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">{selectedCourse.title}</DialogTitle>
+                <DialogDescription className="text-sm text-neutral-500">
+                  {selectedCourse.category}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="mt-4">
+                <div className="w-full h-56 mb-4 overflow-hidden rounded-md">
+                  <img 
+                    src={selectedCourse.image} 
+                    alt={selectedCourse.title} 
+                    className="w-full h-full object-cover transition-transform hover:scale-105 duration-300" 
+                  />
+                </div>
+                <div className="text-neutral-600 prose prose-sm max-w-none">
+                  {selectedCourse.longDescription}
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-end">
+                <Button onClick={() => setSelectedCourse(null)}>Close</Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Layout>
+  );
+};
 
 export default Courses;

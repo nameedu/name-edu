@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      assignments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          due_date: string | null
+          file_path: string | null
+          id: string
+          subject: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          due_date?: string | null
+          file_path?: string | null
+          id?: string
+          subject: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string | null
+          file_path?: string | null
+          id?: string
+          subject?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       exam_result_files: {
         Row: {
           exam_date: string
@@ -148,6 +184,153 @@ export type Database = {
           published_at?: string | null
           title?: string
           type?: Database["public"]["Enums"]["notice_type"]
+        }
+        Relationships: []
+      }
+      previous_papers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_path: string
+          id: string
+          paper_type: string
+          subject: string
+          title: string
+          updated_at: string | null
+          year: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_path: string
+          id?: string
+          paper_type: string
+          subject: string
+          title: string
+          updated_at?: string | null
+          year: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_path?: string
+          id?: string
+          paper_type?: string
+          subject?: string
+          title?: string
+          updated_at?: string | null
+          year?: string
+        }
+        Relationships: []
+      }
+      question_bank: {
+        Row: {
+          answer_text: string | null
+          created_at: string
+          created_by: string | null
+          difficulty: string
+          file_path: string | null
+          id: string
+          question_text: string
+          subject: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          difficulty: string
+          file_path?: string | null
+          id?: string
+          question_text: string
+          subject: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string
+          file_path?: string | null
+          id?: string
+          question_text?: string
+          subject?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      study_materials: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          file_path: string | null
+          id: string
+          material_type: string
+          subject: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          file_path?: string | null
+          id?: string
+          material_type: string
+          subject: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          file_path?: string | null
+          id?: string
+          material_type?: string
+          subject?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      syllabus: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          file_path: string | null
+          id: string
+          subject: string
+          title: string
+          units: string[]
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          file_path?: string | null
+          id?: string
+          subject: string
+          title: string
+          units: string[]
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          file_path?: string | null
+          id?: string
+          subject?: string
+          title?: string
+          units?: string[]
+          updated_at?: string | null
         }
         Relationships: []
       }
