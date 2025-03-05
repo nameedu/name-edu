@@ -8,6 +8,9 @@ import AdminGuard from "@/components/AdminGuard";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { format } from "date-fns";
 
 interface StudentResult {
   candidate_id: string;
@@ -22,6 +25,8 @@ const AddResult = () => {
   const [verificationChecked, setVerificationChecked] = useState(false);
   const [parsedResults, setParsedResults] = useState<StudentResult[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [examTitle, setExamTitle] = useState<string>("");
+  const [examDate, setExamDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
   const { toast } = useToast();
 
   const parseCSV = async (file: File): Promise<StudentResult[]> => {
@@ -98,8 +103,10 @@ const AddResult = () => {
           filename: selectedFile.name,
           file_path: filePath,
           exam_id: parsedResults[0].exam_id,
-          exam_date: new Date().toISOString(),
-          total_results: parsedResults.length
+          exam_date: examDate || new Date().toISOString().split('T')[0],
+          total_results: parsedResults.length,
+          // If exam title is provided, add it to the filename
+          ...(examTitle && { filename: `${examTitle} - ${selectedFile.name}` })
         })
         .select()
         .single();
@@ -126,6 +133,8 @@ const AddResult = () => {
       setSelectedFile(null);
       setParsedResults([]);
       setVerificationChecked(false);
+      setExamTitle("");
+      setExamDate(format(new Date(), "yyyy-MM-dd"));
       if (fileInput) {
         fileInput.value = '';
       }
@@ -163,6 +172,37 @@ const AddResult = () => {
               </ul>
             </div>
 
+            {/* Optional Exam Title field */}
+            <div className="space-y-2">
+              <Label htmlFor="exam-title">Exam Title (Optional)</Label>
+              <Input
+                id="exam-title"
+                type="text"
+                placeholder="e.g. Midterm Physics 2023"
+                value={examTitle}
+                onChange={(e) => setExamTitle(e.target.value)}
+                disabled={isUploading}
+              />
+              <p className="text-xs text-gray-500">
+                A descriptive title for this exam
+              </p>
+            </div>
+
+            {/* Optional Exam Date field */}
+            <div className="space-y-2">
+              <Label htmlFor="exam-date">Exam Date</Label>
+              <Input
+                id="exam-date"
+                type="date"
+                value={examDate}
+                onChange={(e) => setExamDate(e.target.value)}
+                disabled={isUploading}
+              />
+              <p className="text-xs text-gray-500">
+                The date when the exam was conducted
+              </p>
+            </div>
+
             <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-gray-50">
               <input
                 type="file"
@@ -195,6 +235,8 @@ const AddResult = () => {
                   <ul className="mt-2 text-sm">
                     <li>Total Results: {parsedResults.length}</li>
                     <li>Exam ID: {parsedResults[0].exam_id}</li>
+                    {examTitle && <li>Exam Title: {examTitle}</li>}
+                    {examDate && <li>Exam Date: {format(new Date(examDate), "PPP")}</li>}
                   </ul>
                 </div>
 
