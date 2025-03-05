@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,6 +37,9 @@ import AddResult from "./pages/admin/AddResult";
 import Notices from "./pages/admin/Notices";
 import ComingSoon from "./pages/admin/ComingSoon";
 import SingleNotice from "@/pages/SingleNotice";
+import PrivacyPolicy from "./pages/policies/PrivacyPolicy";
+import TermsOfService from "./pages/policies/TermsOfService";
+import CookiesPolicy from "./pages/policies/CookiesPolicy";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +66,11 @@ const App = () => {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/news/:id" element={<SingleNotice />} />
+            
+            {/* Policy Pages */}
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/cookies-policy" element={<CookiesPolicy />} />
             
             {/* Admin Routes - Protected by AdminGuard */}
             <Route path="/admin" element={<AdminGuard><Dashboard /></AdminGuard>} />

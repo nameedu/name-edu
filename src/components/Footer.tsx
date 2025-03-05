@@ -1,5 +1,6 @@
 
-import { Building, Mail, MapPin, Phone } from "lucide-react";
+import { Building, Mail, MapPin, Phone, Shield, FileText, Info } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -26,11 +27,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="/overview" className="text-neutral-300 hover:text-white text-sm">Institute Overview</a></li>
-              <li><a href="/courses" className="text-neutral-300 hover:text-white text-sm">Our Courses</a></li>
-              <li><a href="/faculty" className="text-neutral-300 hover:text-white text-sm">Faculty & Staff</a></li>
-              <li><a href="/results" className="text-neutral-300 hover:text-white text-sm">Results</a></li>
-              <li><a href="/contact" className="text-neutral-300 hover:text-white text-sm">Contact Us</a></li>
+              <li><Link to="/overview" className="text-neutral-300 hover:text-white text-sm">Institute Overview</Link></li>
+              <li><Link to="/courses" className="text-neutral-300 hover:text-white text-sm">Our Courses</Link></li>
+              <li><Link to="/faculty" className="text-neutral-300 hover:text-white text-sm">Faculty & Staff</Link></li>
+              <li><Link to="/results" className="text-neutral-300 hover:text-white text-sm">Results</Link></li>
+              <li><Link to="/contact" className="text-neutral-300 hover:text-white text-sm">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -38,11 +39,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Student Resources</h3>
             <ul className="space-y-2">
-              <li><a href="/materials" className="text-neutral-300 hover:text-white text-sm">Study Materials</a></li>
-              <li><a href="/videos" className="text-neutral-300 hover:text-white text-sm">Video Lectures</a></li>
-              <li><a href="/news" className="text-neutral-300 hover:text-white text-sm">News</a></li>
-              <li><a href="/questionbank" className="text-neutral-300 hover:text-white text-sm">Question Bank</a></li>
-              <li><a href="/papers" className="text-neutral-300 hover:text-white text-sm">Papers</a></li>
+              <li><Link to="/materials" className="text-neutral-300 hover:text-white text-sm">Study Materials</Link></li>
+              <li><Link to="/videos" className="text-neutral-300 hover:text-white text-sm">Video Lectures</Link></li>
+              <li><Link to="/news" className="text-neutral-300 hover:text-white text-sm">News</Link></li>
+              <li><Link to="/questionbank" className="text-neutral-300 hover:text-white text-sm">Question Bank</Link></li>
+              <li><Link to="/papers" className="text-neutral-300 hover:text-white text-sm">Papers</Link></li>
             </ul>
           </div>
 
@@ -92,13 +93,28 @@ const Footer = () => {
         <div className="border-t border-neutral-700 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-neutral-400">
-              <p>© {new Date().getFullYear()} Your Institute Name. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} NAME Institute. All rights reserved.</p>
             </div>
             <div className="mt-4 md:mt-0">
-              <ul className="flex space-x-4 text-sm text-neutral-400">
-                <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white">Cookie Policy</a></li>
+              <ul className="flex flex-wrap gap-4 text-sm text-neutral-400">
+                <li>
+                  <Link to="/privacy-policy" className="flex items-center hover:text-white">
+                    <Shield className="h-4 w-4 mr-1" />
+                    <span>Privacy Policy</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/terms-of-service" className="flex items-center hover:text-white">
+                    <FileText className="h-4 w-4 mr-1" />
+                    <span>Terms of Service</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/cookies-policy" className="flex items-center hover:text-white">
+                    <Info className="h-4 w-4 mr-1" />
+                    <span>Cookies Policy</span>
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
