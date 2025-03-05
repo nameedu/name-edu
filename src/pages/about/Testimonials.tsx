@@ -39,31 +39,6 @@ const Testimonials = () => {
               </Card>
             ))}
           </div>
-
-          {/* Success Stories */}
-          <div className="mt-16">
-            <h2 className="text-3xl font-bold text-center mb-12">Success Stories</h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              {successStories.map((story, index) => (
-                <Card key={index} className="p-6">
-                  <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6">
-                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <MessageSquare className="w-10 h-10 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold mb-2">{story.title}</h3>
-                      <p className="text-neutral-600 mb-4">{story.content}</p>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium">{story.name}</span>
-                        <span className="text-neutral-400">•</span>
-                        <span className="text-primary">{story.achievement}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </Layout>

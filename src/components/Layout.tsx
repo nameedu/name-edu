@@ -63,7 +63,7 @@ const Layout = ({ children }: LayoutProps) => {
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>Student Zone</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="grid w-[400px] gap-3 p-4 md:w-[800px] md:grid-cols-3 bg-white shadow-lg rounded-lg">
+                      <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 bg-white shadow-lg rounded-lg">
                         {/* Study Resources */}
                         <div className="space-y-4">
                           <h4 className="font-medium text-sm text-neutral-700 mb-2">Study Resources</h4>
@@ -106,26 +106,7 @@ const Layout = ({ children }: LayoutProps) => {
                           </ul>
                         </div>
 
-                        {/* Important Links */}
-                        <div className="space-y-4">
-                          <h4 className="font-medium text-sm text-neutral-700 mb-2">Important Links</h4>
-                          <ul className="space-y-2">
-                            {importantLinks.map((item) => (
-                              <li key={item.title}>
-                                <Link
-                                  to={item.href}
-                                  className="flex items-start space-x-2 p-2 hover:bg-neutral-100 rounded-md group"
-                                >
-                                  <Download className="h-5 w-5 text-primary group-hover:text-primary-hover mt-1" />
-                                  <div>
-                                    <div className="text-sm font-medium">{item.title}</div>
-                                    <p className="text-xs text-neutral-600 line-clamp-2">{item.description}</p>
-                                  </div>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                        
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
@@ -166,9 +147,6 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
 
             <div className="flex md:hidden items-center gap-4">
-              <Button className="bg-primary hover:bg-primary-hover text-white text-sm">
-                Student Login
-              </Button>
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="md:hidden">
@@ -245,10 +223,6 @@ const Layout = ({ children }: LayoutProps) => {
 
               </Sheet>
             </div>
-
-            <Button className="hidden md:flex bg-primary hover:bg-primary-hover text-white" onClick={() => window.location.href = '/auth'}>
-              Login
-            </Button>
           </div>
         </div>
       </nav>
@@ -308,12 +282,7 @@ const studentZoneLinks = [
     icon: Video,
     description: "Watch recorded lectures and educational content",
   },
-  {
-    title: "Question Bank PDF",
-    href: "/questionbank",
-    icon: FileText,
-    description: "Download practice questions and sample papers",
-  },
+  
   {
     title: "News",
     href: "/news",
@@ -324,9 +293,10 @@ const studentZoneLinks = [
 
 const downloadLinks = [
   {
-    title: "Assignments",
-    href: "/assignments",
-    description: "Download weekly assignments and worksheets",
+    title: "Question Bank PDF",
+    href: "/questionbank",
+    icon: FileText,
+    description: "Download practice questions and sample papers",
   },
   {
     title: "Syllabus",

@@ -19,20 +19,7 @@ const Footer = () => {
                 Join us in your journey towards academic excellence.
               </p>
             </div>
-            <div className="space-y-2">
-              <a href="tel:+1234567890" className="flex items-center text-sm text-neutral-300 hover:text-white">
-                <Phone className="h-4 w-4 mr-2" />
-                +977 1 5331144
-              </a>
-              <a href="mailto:info@name.edu.np" className="flex items-center text-sm text-neutral-300 hover:text-white">
-                <Mail className="h-4 w-4 mr-2" />
-                info@name.edu.np
-              </a>
-              <div className="flex items-center text-sm text-neutral-300">
-                <MapPin className="h-4 w-4 mr-2" />
-                NAME Building, Ramshah Path, Putalisadak
-              </div>
-            </div>
+            
           </div>
 
           {/* Quick Links */}
@@ -53,9 +40,9 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><a href="/materials" className="text-neutral-300 hover:text-white text-sm">Study Materials</a></li>
               <li><a href="/videos" className="text-neutral-300 hover:text-white text-sm">Video Lectures</a></li>
-              <li><a href="/portal" className="text-neutral-300 hover:text-white text-sm">Student Portal</a></li>
-              <li><a href="/schedule" className="text-neutral-300 hover:text-white text-sm">Exam Schedule</a></li>
-              <li><a href="/payment" className="text-neutral-300 hover:text-white text-sm">Fee Payment</a></li>
+              <li><a href="/news" className="text-neutral-300 hover:text-white text-sm">News</a></li>
+              <li><a href="/questionbank" className="text-neutral-300 hover:text-white text-sm">Question Bank</a></li>
+              <li><a href="/papers" className="text-neutral-300 hover:text-white text-sm">Papers</a></li>
             </ul>
           </div>
 
@@ -84,17 +71,18 @@ const Footer = () => {
                 </svg>
               </a>
             </div>
-            <div className="text-sm text-neutral-300">
-              <p>Subscribe to our newsletter for updates and educational resources.</p>
-              <div className="mt-4 flex">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="bg-neutral-700 text-white px-4 py-2 rounded-l-md focus:outline-none focus:ring-1 focus:ring-primary w-full"
-                />
-                <button className="bg-primary hover:bg-primary-hover px-4 py-2 rounded-r-md transition-colors">
-                  Subscribe
-                </button>
+            <div className="space-y-2">
+              <a href="tel:+1234567890" className="flex items-center text-sm text-neutral-300 hover:text-white">
+                <Phone className="h-4 w-4 mr-2" />
+                +977 1 5331144
+              </a>
+              <a href="mailto:info@name.edu.np" className="flex items-center text-sm text-neutral-300 hover:text-white">
+                <Mail className="h-4 w-4 mr-2" />
+                info@name.edu.np
+              </a>
+              <div className="flex items-center text-sm text-neutral-300">
+                <MapPin className="h-4 w-4 mr-2" />
+                NAME Building, Ramshah Path, Putalisadak
               </div>
             </div>
           </div>

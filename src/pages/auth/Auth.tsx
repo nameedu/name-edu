@@ -127,20 +127,6 @@ const Auth = () => {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
-
-              <div className="text-center space-y-2">
-                <p className="text-sm text-gray-600">
-                  Don't have an account?{" "}
-                  <Link to="/signup" className="text-primary hover:underline">
-                    Sign Up
-                  </Link>
-                </p>
-                <p className="text-sm text-gray-600">
-                  <Link to="/reset-password" className="text-primary hover:underline">
-                    Forgot Password?
-                  </Link>
-                </p>
-              </div>
             </form>
           </Card>
         </div>
