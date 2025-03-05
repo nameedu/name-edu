@@ -88,6 +88,14 @@ const AddResult = () => {
     const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
 
     try {
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('You must be logged in to upload results');
+      }
+      
+      const userId = session.user.id;
       const fileExt = selectedFile.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${fileExt}`;
       
@@ -97,16 +105,20 @@ const AddResult = () => {
 
       if (uploadError) throw uploadError;
 
+      // Create a filename with the title if provided
+      const displayFilename = examTitle ? 
+        `${examTitle} - ${selectedFile.name}` : 
+        selectedFile.name;
+
       const { data: fileData, error: fileError } = await supabase
         .from('exam_result_files')
         .insert({
-          filename: selectedFile.name,
+          filename: displayFilename,
           file_path: filePath,
           exam_id: parsedResults[0].exam_id,
           exam_date: examDate || new Date().toISOString().split('T')[0],
           total_results: parsedResults.length,
-          // If exam title is provided, add it to the filename
-          ...(examTitle && { filename: `${examTitle} - ${selectedFile.name}` })
+          uploaded_by: userId, // Set the user ID who uploaded the file
         })
         .select()
         .single();

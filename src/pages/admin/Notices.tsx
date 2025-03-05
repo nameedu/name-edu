@@ -138,12 +138,22 @@ const Notices = () => {
     mutationFn: async (values: NoticeFormValues) => {
       const { files, ...noticeData } = values;
       
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('You must be logged in to create notices');
+      }
+      
       const { data, error } = await supabase
         .from("notices")
         .insert({
-          ...noticeData,
+          title: noticeData.title,
+          description: noticeData.description,
+          type: noticeData.type,
+          link: noticeData.link,
           published_at: new Date().toISOString(),
           is_active: true,
+          created_by: session.user.id
         })
         .select()
         .single();

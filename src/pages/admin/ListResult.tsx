@@ -29,6 +29,18 @@ const ListResult = () => {
 
   const fetchExamFiles = async () => {
     try {
+      // Get the user session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to view results",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('exam_result_files')
         .select('*')
@@ -60,6 +72,13 @@ const ListResult = () => {
     console.log('Starting deletion process for file:', fileId, 'path:', filePath);
 
     try {
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('You must be logged in to delete results');
+      }
+      
       // First delete all results associated with this file
       console.log('Deleting exam results...');
       const { error: resultsError } = await supabase
