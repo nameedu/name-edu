@@ -47,6 +47,21 @@ const Contact = () => {
                 </div>
               </div>
               
+              {/* Google Maps Embed */}
+              <div className="w-full h-80 rounded-lg overflow-hidden shadow-md mb-6">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.2747151862575!2d85.31714!3d27.7053!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19a7c6cd102b%3A0x78049640e89dd5d0!2sPutalisadak%2C%20Kathmandu%2044600!5m2!1s0x39eb19a7c6cd102b%3A0x78049640e89dd5d0"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen={true}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="NAME Institute Location"
+                  className="rounded-lg"
+                ></iframe>
+              </div>
+              
               <div className="text-center">
                 <p className="text-sm text-neutral-500">
                   For admission inquiries, please visit our campus or call us directly.
