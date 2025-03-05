@@ -23,11 +23,18 @@ interface StudentResult {
   percentage: number;
 }
 
+interface ExamInfo {
+  examId: string;
+  examTitle?: string;
+  examDate?: string;
+}
+
 const Results = () => {
   const [searchId, setSearchId] = useState("");
   const [selectedExam, setSelectedExam] = useState<string>("");
   const [result, setResult] = useState<StudentResult | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [examInfo, setExamInfo] = useState<ExamInfo | null>(null);
   const { toast } = useToast();
 
   // Fetch exam options
@@ -36,11 +43,26 @@ const Results = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('exam_result_files')
-        .select('exam_id')
+        .select('exam_id, filename, exam_date')
         .order('exam_date', { ascending: false });
 
       if (error) throw error;
-      return Array.from(new Set(data.map(d => d.exam_id)));
+      
+      // Create a map to store unique exam IDs with their titles
+      const examsMap = new Map();
+      
+      data.forEach(item => {
+        if (!examsMap.has(item.exam_id)) {
+          const titleMatch = item.filename.match(/^(.*?) - /);
+          examsMap.set(item.exam_id, {
+            examId: item.exam_id,
+            examTitle: titleMatch ? titleMatch[1] : undefined,
+            examDate: item.exam_date
+          });
+        }
+      });
+      
+      return Array.from(examsMap.values());
     }
   });
 
@@ -94,6 +116,13 @@ const Results = () => {
           percentage: data.percentage
         };
         setResult(foundResult);
+        
+        if (examOptions) {
+          const selectedExamInfo = examOptions.find(exam => exam.examId === selectedExam);
+          if (selectedExamInfo) {
+            setExamInfo(selectedExamInfo);
+          }
+        }
       } else {
         toast({
           title: "No Results Found",
@@ -132,18 +161,24 @@ const Results = () => {
                       </label>
                       <Select
                         value={selectedExam}
-                        onValueChange={setSelectedExam}
+                        onValueChange={(value) => {
+                          setSelectedExam(value);
+                          const selected = examOptions?.find(exam => exam.examId === value);
+                          if (selected) {
+                            setExamInfo(selected);
+                          }
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select an exam" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border border-gray-300 rounded-md shadow-lg z-50">
-  {examOptions?.map((examId) => (
-    <SelectItem key={examId} value={examId} className="hover:bg-gray-100 px-4 py-2">
-      {examId}
-    </SelectItem>
-  ))}
-</SelectContent>
+                          {examOptions?.map((exam) => (
+                            <SelectItem key={exam.examId} value={exam.examId} className="hover:bg-gray-100 px-4 py-2">
+                              {exam.examTitle ? `${exam.examTitle} (${exam.examId})` : exam.examId}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                     </div>
 
@@ -178,7 +213,10 @@ const Results = () => {
                     <div>
                       <h2 className="text-2xl font-bold mb-1">Result Details</h2>
                       <p className="text-neutral-600">Candidate ID: {result.candidateId}</p>
-                      <p className="text-neutral-600">Exam ID: {result.examId}</p>
+                      <p className="text-neutral-600">
+                        {examInfo?.examTitle ? examInfo.examTitle : `Exam ID: ${result.examId}`}
+                        {examInfo?.examDate && ` (${new Date(examInfo.examDate).toLocaleDateString()})`}
+                      </p>
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-primary mb-1">Rank: {result.examRank}</div>
@@ -222,6 +260,7 @@ const Results = () => {
                   <div className="flex items-center gap-2 mb-6">
                     <Trophy className="w-5 h-5 text-yellow-500" />
                     <h2 className="text-xl font-bold">Top Performers</h2>
+                    {examInfo?.examTitle && <span className="text-sm text-neutral-600 ml-2">({examInfo.examTitle})</span>}
                   </div>
                   
                   <div className="space-y-4">

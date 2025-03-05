@@ -65,15 +65,26 @@ const ListResult = () => {
       const { error: resultsError } = await supabase
         .from('exam_results')
         .delete()
-        .eq('file_id', fileId)
-        .throwOnError();
+        .eq('file_id', fileId);
 
       if (resultsError) {
         console.error('Error deleting results:', resultsError);
-        throw new Error(`Failed to delete results: ${resultsError.message}`);
+        throw new Error(`Failed to delete results: ${resultsError.message || 'Unknown error'}`);
       }
 
-      // Then delete the file from storage
+      // Then delete the file record
+      console.log('Deleting file record...');
+      const { error: fileError } = await supabase
+        .from('exam_result_files')
+        .delete()
+        .eq('id', fileId);
+
+      if (fileError) {
+        console.error('Error deleting file record:', fileError);
+        throw new Error(`Failed to delete file record: ${fileError.message || 'Unknown error'}`);
+      }
+
+      // Finally delete the file from storage
       console.log('Deleting file from storage...');
       const { error: storageError } = await supabase.storage
         .from('exam_results')
@@ -81,20 +92,12 @@ const ListResult = () => {
 
       if (storageError) {
         console.error('Error deleting from storage:', storageError);
-        throw new Error(`Failed to delete file from storage: ${storageError.message}`);
-      }
-
-      // Finally delete the file record
-      console.log('Deleting file record...');
-      const { error: fileError } = await supabase
-        .from('exam_result_files')
-        .delete()
-        .eq('id', fileId)
-        .throwOnError();
-
-      if (fileError) {
-        console.error('Error deleting file record:', fileError);
-        throw new Error(`Failed to delete file record: ${fileError.message}`);
+        // We don't throw here since we've already deleted the record
+        toast({
+          title: "Warning",
+          description: `The file record was deleted but the actual file could not be removed from storage: ${storageError.message || 'Unknown error'}`,
+          variant: "default"
+        });
       }
 
       // Update local state to remove the deleted file
@@ -106,14 +109,11 @@ const ListResult = () => {
       });
       
       console.log('Deletion process completed successfully');
-
-      // Refresh the file list after successful deletion
-      await fetchExamFiles();
     } catch (error: any) {
       console.error('Deletion process failed:', error);
       toast({
         title: "Error deleting file",
-        description: error.message,
+        description: error.message || "An unknown error occurred",
         variant: "destructive"
       });
     } finally {
@@ -197,10 +197,13 @@ const ListResult = () => {
                       <div className="flex items-center gap-4">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          {format(new Date(file.uploaded_at), 'PPp')}
+                          {file.exam_date ? format(new Date(file.exam_date), 'PP') : "N/A"}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          Uploaded: {format(new Date(file.uploaded_at), 'PPp')}
                         </span>
                       </div>
-                      <div className="mt-2 flex items-center gap-2">
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
                         <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
                           Exam ID: {file.exam_id}
                         </span>
