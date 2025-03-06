@@ -17,19 +17,25 @@ export const uploadExamResults = async (
   
   const userId = session.user.id;
   const fileExt = selectedFile.name.split('.').pop();
+  // Ensure the file path starts with the user ID to comply with our RLS policy
   const filePath = `${userId}/${crypto.randomUUID()}.${fileExt}`;
   
+  console.log('Uploading file to path:', filePath);
   const { error: uploadError } = await supabase.storage
     .from('exam_results')
     .upload(filePath, selectedFile);
 
-  if (uploadError) throw uploadError;
+  if (uploadError) {
+    console.error('Storage upload error:', uploadError);
+    throw uploadError;
+  }
 
   // Create a filename with the title if provided
   const displayFilename = examTitle ? 
     `${examTitle} - ${selectedFile.name}` : 
     selectedFile.name;
 
+  console.log('Creating exam_result_files record');
   const { data: fileData, error: fileError } = await supabase
     .from('exam_result_files')
     .insert({
@@ -43,8 +49,12 @@ export const uploadExamResults = async (
     .select()
     .single();
 
-  if (fileError) throw fileError;
+  if (fileError) {
+    console.error('File record error:', fileError);
+    throw fileError;
+  }
 
+  console.log('Inserting exam results');
   const { error: resultsError } = await supabase
     .from('exam_results')
     .insert(
@@ -54,7 +64,10 @@ export const uploadExamResults = async (
       }))
     );
 
-  if (resultsError) throw resultsError;
+  if (resultsError) {
+    console.error('Results insert error:', resultsError);
+    throw resultsError;
+  }
 
   return {
     fileData,
