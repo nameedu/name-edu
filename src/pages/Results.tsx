@@ -41,6 +41,12 @@ const Results = () => {
   const { data: examOptions } = useQuery({
     queryKey: ["examOptions"],
     queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("You must be logged in to view exams");
+      }
+      
       const { data, error } = await supabase
         .from('exam_result_files')
         .select('exam_id, filename, exam_date')
@@ -71,6 +77,12 @@ const Results = () => {
     queryKey: ["topPerformers", selectedExam],
     enabled: !!selectedExam,
     queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("You must be logged in to view results");
+      }
+      
       const { data, error } = await supabase
         .from('exam_results')
         .select('*')
@@ -98,6 +110,12 @@ const Results = () => {
     setResult(null);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("You must be logged in to view results");
+      }
+      
       const { data, error } = await supabase
         .from('exam_results')
         .select('*')

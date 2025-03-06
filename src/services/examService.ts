@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { ExamFile } from "@/types/exam";
-import { useToast } from "@/components/ui/use-toast";
 
 export const fetchExamFiles = async () => {
   try {
@@ -10,6 +9,17 @@ export const fetchExamFiles = async () => {
     
     if (!session) {
       throw new Error("You must be logged in to view results");
+    }
+    
+    // Check if user has admin role
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', session.user.id)
+      .single();
+      
+    if (roleData?.role !== 'admin') {
+      throw new Error("Only administrators can view all exam files");
     }
     
     const { data, error } = await supabase
@@ -31,6 +41,17 @@ export const deleteExamFile = async (fileId: string, filePath: string) => {
     
     if (!session) {
       throw new Error('You must be logged in to delete results');
+    }
+    
+    // Check if user has admin role
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', session.user.id)
+      .single();
+      
+    if (roleError || roleData?.role !== 'admin') {
+      throw new Error('Only administrators can delete exam results');
     }
     
     // First delete all results associated with this file

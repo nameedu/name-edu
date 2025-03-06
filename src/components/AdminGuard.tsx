@@ -43,14 +43,15 @@ const AdminGuard = ({ children }: AdminGuardProps) => {
         .from('user_roles')
         .select('role')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
-      if (roleError || roleData?.role !== 'admin') {
+      if (roleError || !roleData || roleData.role !== 'admin') {
+        console.error('Role verification error:', roleError);
         throw new Error('Unauthorized access');
       }
 
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Access Denied",
         description: "You must be logged in as an administrator to access this page",

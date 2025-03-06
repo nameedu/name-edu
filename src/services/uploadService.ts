@@ -15,9 +15,20 @@ export const uploadExamResults = async (
     throw new Error('You must be logged in to upload results');
   }
   
+  // Check if user has admin role
+  const { data: roleData, error: roleError } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', session.user.id)
+    .single();
+    
+  if (roleError || roleData?.role !== 'admin') {
+    console.error('Role verification error:', roleError);
+    throw new Error('Only administrators can upload exam results');
+  }
+  
   const userId = session.user.id;
   const fileExt = selectedFile.name.split('.').pop();
-  // Ensure the file path starts with the user ID to comply with our RLS policy
   const filePath = `${userId}/${crypto.randomUUID()}.${fileExt}`;
   
   console.log('Uploading file to path:', filePath);
@@ -44,7 +55,7 @@ export const uploadExamResults = async (
       exam_id: parsedResults[0].exam_id,
       exam_date: examDate || new Date().toISOString().split('T')[0],
       total_results: parsedResults.length,
-      uploaded_by: userId // Set the user ID who uploaded the file
+      uploaded_by: userId
     })
     .select()
     .single();
