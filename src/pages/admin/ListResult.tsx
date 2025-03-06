@@ -79,6 +79,7 @@ const ListResult = () => {
         throw new Error('You must be logged in to delete results');
       }
       
+      // We'll modify the deletion order to fix potential issues
       // First delete all results associated with this file
       console.log('Deleting exam results...');
       const { error: resultsError } = await supabase

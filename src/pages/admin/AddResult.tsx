@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface StudentResult {
   candidate_id: string;
@@ -28,6 +29,7 @@ const AddResult = () => {
   const [examTitle, setExamTitle] = useState<string>("");
   const [examDate, setExamDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const parseCSV = async (file: File): Promise<StudentResult[]> => {
     const text = await file.text();
@@ -97,7 +99,7 @@ const AddResult = () => {
       
       const userId = session.user.id;
       const fileExt = selectedFile.name.split('.').pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${userId}/${crypto.randomUUID()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('exam_results')
@@ -118,7 +120,7 @@ const AddResult = () => {
           exam_id: parsedResults[0].exam_id,
           exam_date: examDate || new Date().toISOString().split('T')[0],
           total_results: parsedResults.length,
-          uploaded_by: userId, // Set the user ID who uploaded the file
+          uploaded_by: userId // Set the user ID who uploaded the file
         })
         .select()
         .single();
@@ -150,6 +152,9 @@ const AddResult = () => {
       if (fileInput) {
         fileInput.value = '';
       }
+
+      // Navigate to list page after successful upload
+      navigate('/admin/list-result');
 
     } catch (error: any) {
       toast({
